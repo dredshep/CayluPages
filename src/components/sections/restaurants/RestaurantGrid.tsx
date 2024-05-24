@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import RestaurantCard from "@components/cards/RestaurantCard";
 import restaurantCardData from "@/dummyData/restaurantsCardData";
+import Link from "next/link";
 
 const gridWidth = 492;
 const gapY = 56;
@@ -28,15 +29,17 @@ const RestaurantGrid = () => {
     <GridContainer>
       <Grid>
         {restaurantCardData.map((data, index) => (
-          <RestaurantCard
-            key={index}
-            imageUrl={data.imageUrl}
-            altText={data.altText}
-            name={data.name}
-            rating={data.rating}
-            cuisineType={data.cuisineType}
-            deliveryTime={data.deliveryTime}
-          />
+          <Link href={`/restaurantes/menu`} key={index}>
+            <RestaurantCard
+              key={index}
+              imageUrl={data.imageUrl}
+              altText={data.altText}
+              name={data.name}
+              rating={data.rating}
+              cuisineType={data.cuisineType}
+              deliveryTime={data.deliveryTime}
+            />
+          </Link>
         ))}
       </Grid>
     </GridContainer>

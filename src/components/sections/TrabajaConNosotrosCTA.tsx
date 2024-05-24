@@ -1,5 +1,5 @@
-import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import Image from "next/image";
+import ciclista from "@/assets/frontpage/ciclista.svg";
 
 export default function TrabajaconNosotrosCTA() {
   return (
@@ -8,7 +8,7 @@ export default function TrabajaconNosotrosCTA() {
         <Image
           className="w-[623px] h-[632px]"
           // src="https://via.assets.so/img.jpg?w=492&h=307&tc=coral&bg=lightgray"
-          src={getPlaceholderImageUrl({ width: 632, height: 632 })}
+          src={ciclista}
           width={623}
           height={632}
           alt="delivery guy vector"

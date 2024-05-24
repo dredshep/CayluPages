@@ -7,7 +7,7 @@ import AppDownloadCTA from "@components/sections/AppDownloadCTA";
 import TrabajaconNosotrosCTA from "@components/sections/TrabajaConNosotrosCTA";
 import ReviewCard from "@components/cards/ReviewCard";
 import reviews from "@/dummyData/reviews";
-import Footer from "@/components/sections/Footer";
+
 function Navbar() {
   return (
     <nav>
@@ -38,9 +38,9 @@ function Navbar() {
 export default function Home() {
   return (
     <div className="bg-white">
-      <div className="min-h-screen bg-black h-full">
+      <div className="min-h-screen  bg-frontpage-banner h-full">
         <Navbar />
-        <div className="flex flex-col justify-center bg-red-600 h-[calc(100vh-128px)] w-full px-[129px] gap-6">
+        <div className="flex flex-col justify-center h-[calc(100vh-128px)] w-full px-[129px] gap-6">
           <h1 className="text-white text-7xl font-bold">
             Lo mejor, ¡cerca de ti!
           </h1>
@@ -56,7 +56,7 @@ export default function Home() {
             </div>
             <Link
               href="/restaurantes"
-              className="bg-teal-400 text-black text-4xl py-[25px] px-[57px] rounded-[11px]"
+              className="bg-teal-400 text-black text-4xl py-[25px] px-[57px] rounded-[11px] flex items-center"
             >
               Buscar
             </Link>

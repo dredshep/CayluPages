@@ -1,7 +1,14 @@
-import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
+import prime_burger from "@/assets/restaurants/prime_burger.png";
+import rodeo_grill from "@/assets/restaurants/rodeo_grill.png";
+import sanders_chicken from "@/assets/restaurants/sanders_chicken.png";
+
+import tacos from "@/assets/platos/tacos.png";
+import pizza from "@/assets/platos/pizza.png";
+import paella from "@/assets/platos/paella.png";
+import { StaticImageData } from "next/image";
 
 export interface RestaurantData {
-  imageUrl: string;
+  imageUrl: string | StaticImageData;
   altText: string;
   name: string;
   rating: number;
@@ -11,10 +18,7 @@ export interface RestaurantData {
 
 const popularEnTuZona: RestaurantData[] = [
   {
-    imageUrl: getPlaceholderImageUrl({
-      width: 492,
-      height: 307,
-    }),
+    imageUrl: rodeo_grill,
     altText: "Rodeo Grill",
     name: "Rodeo Grill",
     rating: 4.5,
@@ -22,10 +26,7 @@ const popularEnTuZona: RestaurantData[] = [
     deliveryTime: "15-20min",
   },
   {
-    imageUrl: getPlaceholderImageUrl({
-      width: 492,
-      height: 307,
-    }),
+    imageUrl: prime_burger,
     altText: "Prime Burger",
     name: "Prime Burger",
     rating: 4.5,
@@ -33,10 +34,7 @@ const popularEnTuZona: RestaurantData[] = [
     deliveryTime: "12-20min",
   },
   {
-    imageUrl: getPlaceholderImageUrl({
-      width: 492,
-      height: 307,
-    }),
+    imageUrl: sanders_chicken,
     altText: "Sander’s Chicken",
     name: "Sander’s Chicken",
     rating: 4.5,
@@ -47,10 +45,7 @@ const popularEnTuZona: RestaurantData[] = [
 
 const ofertasDeHoy: RestaurantData[] = [
   {
-    imageUrl: getPlaceholderImageUrl({
-      width: 492,
-      height: 307,
-    }),
+    imageUrl: tacos,
     altText: "Tacos de mar",
     name: "Tacos de mar",
     rating: 4.5,
@@ -58,10 +53,7 @@ const ofertasDeHoy: RestaurantData[] = [
     deliveryTime: "10-14min",
   },
   {
-    imageUrl: getPlaceholderImageUrl({
-      width: 492,
-      height: 307,
-    }),
+    imageUrl: pizza,
     altText: "Pizza Napolitana",
     name: "Pizza Napolitana",
     rating: 4.5,
@@ -69,10 +61,7 @@ const ofertasDeHoy: RestaurantData[] = [
     deliveryTime: "12-15min",
   },
   {
-    imageUrl: getPlaceholderImageUrl({
-      width: 492,
-      height: 307,
-    }),
+    imageUrl: paella,
     altText: "Paella de mar",
     name: "Paella de mar",
     rating: 4.5,

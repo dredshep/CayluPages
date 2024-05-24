@@ -2,6 +2,7 @@ import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import Image from "next/image";
 import PlayStoreIcon from "../icons/PlaystoreIcon";
 import AppleIcon from "../icons/AppleIcon";
+import telefono from "@/assets/frontpage/telefono.png";
 
 export default function AppDownloadCTA() {
   return (
@@ -19,7 +20,7 @@ export default function AppDownloadCTA() {
           <Image
             className="w-[312px] h-[678px]"
             // src="https://via.assets.so/img.jpg?w=492&h=307&tc=coral&bg=lightgray"
-            src={getPlaceholderImageUrl({ width: 312, height: 678 })}
+            src={telefono}
             width={312}
             height={678}
             alt="phone"

@@ -1,9 +1,9 @@
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import StarIcon from "@components/icons/StarIcon";
 
 // Define a type for the props that your component will accept
 interface RestaurantCardProps {
-  imageUrl: string;
+  imageUrl: string | StaticImageData;
   altText: string;
   name: string;
   rating: number;
@@ -26,14 +26,16 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
 }) => {
   return (
     <div style={{ width: `${width}px` }} className="flex flex-col">
-      <Image
-        className="w-full rounded-[14px] shadow-xl"
-        src={imageUrl}
-        alt={altText}
-        width={width}
-        height={Math.ceil(height * 0.75)}
-        quality={100}
-      />
+      <div className="overflow-hidden rounded-[14px] shadow-xl">
+        <Image
+          className="w-full rounded-[14px] scale-[111%] bg-red-400"
+          src={imageUrl}
+          alt={altText}
+          width={width}
+          height={Math.ceil(height * 0.75)}
+          quality={100}
+        />
+      </div>
       <div className="max-h-max leading-[1.324]">
         <div className="flex flex-col items-center mt-3">
           <div className="flex justify-between w-full flex-row">

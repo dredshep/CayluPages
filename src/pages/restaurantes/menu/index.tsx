@@ -4,13 +4,14 @@ import hamburguesas from "@/dummyData/hamburguesas";
 import Image from "next/image";
 import AppNavbar from "@/components/sections/AppNavbar";
 import Footer from "@/components/sections/Footer";
+import banner from "@/assets/hamburguesas/banner.png";
 
 export default function RestaurantMenu() {
   return (
     <div className="bg-white min-h-screen max-w-[1685px] mx-auto pb-[194px]">
       <AppNavbar />
       <Image
-        src={getPlaceholderImageUrl({ width: 1685, height: 368 })}
+        src={banner}
         width={1685}
         height={368}
         alt="Restaurant menu cover image"
@@ -69,10 +70,11 @@ export default function RestaurantMenu() {
                 </div>
                 <div className="w-[300px] h-[163px] bg-gray-300 rounded-r-[7px] shrink-0 overflow-hidden">
                   <Image
-                    src={getPlaceholderImageUrl({ width: 300, height: 163 })}
+                    src={hamburguesa.imageUrl}
                     width={300}
                     height={163}
                     alt={hamburguesa.name}
+                    className="object-cover object-center h-full"
                   />
                 </div>
               </div>
