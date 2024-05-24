@@ -62,7 +62,7 @@ export default function Restaurantes() {
       </div>
       <div className="h-[132px]"></div>
       <RestaurantGrid />
-      {/*  */}
+      {/* a */}
     </div>
   );
 }
