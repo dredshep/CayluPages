@@ -1,0 +1,587 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model additionals {
+  id         BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id BigInt             @db.UnsignedBigInt
+  product_id BigInt             @db.UnsignedBigInt
+  name       String             @db.VarChar(255)
+  price      Decimal            @db.Decimal(8, 2)
+  status     additionals_status @default(Available)
+  created_at DateTime?          @db.Timestamp(0)
+  updated_at DateTime?          @db.Timestamp(0)
+  companies  companies          @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "additionals_company_id_foreign")
+  products   products           @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "additionals_product_id_foreign")
+
+  @@index([company_id], map: "additionals_company_id_foreign")
+  @@index([product_id], map: "additionals_product_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model business_hours {
+  id             BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id     BigInt                @db.UnsignedBigInt
+  day            business_hours_day
+  open           DateTime              @db.Time(0)
+  close          DateTime              @db.Time(0)
+  cooking_period String                @db.LongText
+  status         business_hours_status @default(Active)
+  created_at     DateTime?             @db.Timestamp(0)
+  updated_at     DateTime?             @db.Timestamp(0)
+  companies      companies             @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "business_hours_company_id_foreign")
+
+  @@index([company_id], map: "business_hours_company_id_foreign")
+}
+
+model cache {
+  key        String @id @db.VarChar(255)
+  value      String @db.MediumText
+  expiration Int
+}
+
+model cache_locks {
+  key        String @id @db.VarChar(255)
+  owner      String @db.VarChar(255)
+  expiration Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model category_kitchens {
+  id          BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String                   @db.VarChar(255)
+  description String                   @db.Text
+  status      category_kitchens_status @default(Active)
+  created_at  DateTime?                @db.Timestamp(0)
+  updated_at  DateTime?                @db.Timestamp(0)
+  deleted_at  DateTime?                @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model category_products {
+  id          BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id  BigInt                   @db.UnsignedBigInt
+  name        String                   @db.VarChar(255)
+  description String                   @db.Text
+  status      category_products_status @default(Active)
+  created_at  DateTime?                @db.Timestamp(0)
+  updated_at  DateTime?                @db.Timestamp(0)
+  deleted_at  DateTime?                @db.Timestamp(0)
+  companies   companies                @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "category_products_company_id_foreign")
+  products    products[]
+
+  @@index([company_id], map: "category_products_company_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model cities {
+  id         BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String        @db.VarChar(255)
+  state_id   BigInt        @db.UnsignedBigInt
+  status     cities_status @default(Active)
+  created_at DateTime?     @db.Timestamp(0)
+  updated_at DateTime?     @db.Timestamp(0)
+  states     states        @relation(fields: [state_id], references: [id], onUpdate: Restrict, map: "cities_state_id_foreign")
+  clients    clients[]
+  companies  companies[]
+
+  @@index([state_id], map: "cities_state_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model clients {
+  id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id         BigInt            @db.UnsignedBigInt
+  geolocation_id  BigInt            @db.UnsignedBigInt
+  state_id        BigInt            @db.UnsignedBigInt
+  city_id         BigInt            @db.UnsignedBigInt
+  address         String            @db.VarChar(255)
+  ref_point       String            @db.VarChar(255)
+  code_postal     String            @db.VarChar(255)
+  status          clients_status    @default(Active)
+  created_at      DateTime?         @db.Timestamp(0)
+  updated_at      DateTime?         @db.Timestamp(0)
+  deleted_at      DateTime?         @db.Timestamp(0)
+  cities          cities            @relation(fields: [city_id], references: [id], onUpdate: Restrict, map: "clients_city_id_foreign")
+  geolocations    geolocations      @relation(fields: [geolocation_id], references: [id], onUpdate: Restrict, map: "clients_geolocation_id_foreign")
+  states          states            @relation(fields: [state_id], references: [id], onUpdate: Restrict, map: "clients_state_id_foreign")
+  users           users             @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "clients_user_id_foreign")
+  order_purchases order_purchases[]
+
+  @@index([city_id], map: "clients_city_id_foreign")
+  @@index([geolocation_id], map: "clients_geolocation_id_foreign")
+  @@index([state_id], map: "clients_state_id_foreign")
+  @@index([user_id], map: "clients_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model companies {
+  id                BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String                 @db.VarChar(255)
+  logo              String                 @db.VarChar(255)
+  address           String                 @db.VarChar(255)
+  phone             String                 @db.VarChar(255)
+  email             String                 @db.VarChar(255)
+  website           String?                @db.VarChar(255)
+  description       String?                @db.Text
+  type_company      companies_type_company
+  state_id          BigInt                 @db.UnsignedBigInt
+  city_id           BigInt                 @db.UnsignedBigInt
+  zip_code          String                 @db.VarChar(255)
+  geolocation_id    BigInt                 @db.UnsignedBigInt
+  status            companies_status       @default(Active)
+  created_at        DateTime?              @db.Timestamp(0)
+  updated_at        DateTime?              @db.Timestamp(0)
+  deleted_at        DateTime?              @db.Timestamp(0)
+  additionals       additionals[]
+  business_hours    business_hours[]
+  category_products category_products[]
+  cities            cities                 @relation(fields: [city_id], references: [id], onUpdate: Restrict, map: "companies_city_id_foreign")
+  geolocations      geolocations           @relation(fields: [geolocation_id], references: [id], onUpdate: Restrict, map: "companies_geolocation_id_foreign")
+  states            states                 @relation(fields: [state_id], references: [id], onUpdate: Restrict, map: "companies_state_id_foreign")
+  company_holidays  company_holidays[]
+  offers            offers[]
+  order_purchases   order_purchases[]
+  orders            orders[]
+  products          products[]
+
+  @@index([city_id], map: "companies_city_id_foreign")
+  @@index([geolocation_id], map: "companies_geolocation_id_foreign")
+  @@index([state_id], map: "companies_state_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model deliveries {
+  id                BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id           BigInt                  @db.UnsignedBigInt
+  order_purchase_id BigInt                  @db.UnsignedBigInt
+  time_start        DateTime                @db.Timestamp(0)
+  time_end          DateTime?               @db.Timestamp(0)
+  order_status      deliveries_order_status @default(Pending)
+  created_at        DateTime?               @db.Timestamp(0)
+  updated_at        DateTime?               @db.Timestamp(0)
+  order_purchases   order_purchases         @relation(fields: [order_purchase_id], references: [id], onUpdate: Restrict, map: "deliveries_order_purchase_id_foreign")
+  users             users                   @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "deliveries_user_id_foreign")
+
+  @@index([order_purchase_id], map: "deliveries_order_purchase_id_foreign")
+  @@index([user_id], map: "deliveries_user_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model employee_details {
+  id         BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id    BigInt                    @db.UnsignedBigInt
+  dni        String                    @db.VarChar(255)
+  address    String                    @db.VarChar(255)
+  job_type   employee_details_job_type @default(Full_time)
+  date_start DateTime                  @db.Date
+  date_end   DateTime?                 @db.Date
+  status     employee_details_status   @default(Active)
+  created_at DateTime?                 @db.Timestamp(0)
+  updated_at DateTime?                 @db.Timestamp(0)
+  deleted_at DateTime?                 @db.Timestamp(0)
+  users      users                     @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "employee_details_user_id_foreign")
+
+  @@index([user_id], map: "employee_details_user_id_foreign")
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model geolocations {
+  id         BigInt              @id @default(autoincrement()) @db.UnsignedBigInt
+  lat        String              @db.VarChar(255)
+  lng        String              @db.VarChar(255)
+  status     geolocations_status @default(Active)
+  created_at DateTime?           @db.Timestamp(0)
+  updated_at DateTime?           @db.Timestamp(0)
+  clients    clients[]
+  companies  companies[]
+}
+
+model job_batches {
+  id             String  @id @db.VarChar(255)
+  name           String  @db.VarChar(255)
+  total_jobs     Int
+  pending_jobs   Int
+  failed_jobs    Int
+  failed_job_ids String  @db.LongText
+  options        String? @db.MediumText
+  cancelled_at   Int?
+  created_at     Int
+  finished_at    Int?
+}
+
+model jobs {
+  id           BigInt @id @default(autoincrement()) @db.UnsignedBigInt
+  queue        String @db.VarChar(255)
+  payload      String @db.LongText
+  attempts     Int    @db.UnsignedTinyInt
+  reserved_at  Int?   @db.UnsignedInt
+  available_at Int    @db.UnsignedInt
+  created_at   Int    @db.UnsignedInt
+
+  @@index([queue], map: "jobs_queue_index")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model offers {
+  id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id      BigInt            @db.UnsignedBigInt
+  name            String            @db.VarChar(255)
+  discount        Int
+  status          offers_status     @default(Active)
+  created_at      DateTime?         @db.Timestamp(0)
+  updated_at      DateTime?         @db.Timestamp(0)
+  deleted_at      DateTime?         @db.Timestamp(0)
+  companies       companies         @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "offers_company_id_foreign")
+  order_purchases order_purchases[]
+
+  @@index([company_id], map: "offers_company_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model order_purchases {
+  id                BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  client_id         BigInt                 @db.UnsignedBigInt
+  order_id          BigInt                 @db.UnsignedBigInt
+  offer_id          BigInt?                @db.UnsignedBigInt
+  company_id        BigInt                 @db.UnsignedBigInt
+  payment_method_id BigInt                 @db.UnsignedBigInt
+  total_amount      Decimal                @db.Decimal(8, 2)
+  status            order_purchases_status @default(Pending)
+  created_at        DateTime?              @db.Timestamp(0)
+  updated_at        DateTime?              @db.Timestamp(0)
+  deliveries        deliveries[]
+  clients           clients                @relation(fields: [client_id], references: [id], onUpdate: Restrict, map: "order_purchases_client_id_foreign")
+  companies         companies              @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "order_purchases_company_id_foreign")
+  offers            offers?                @relation(fields: [offer_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "order_purchases_offer_id_foreign")
+  orders            orders                 @relation(fields: [order_id], references: [id], onUpdate: Restrict, map: "order_purchases_order_id_foreign")
+  payment_methods   payment_methods        @relation(fields: [payment_method_id], references: [id], onUpdate: Restrict, map: "order_purchases_payment_method_id_foreign")
+
+  @@index([client_id], map: "order_purchases_client_id_foreign")
+  @@index([company_id], map: "order_purchases_company_id_foreign")
+  @@index([offer_id], map: "order_purchases_offer_id_foreign")
+  @@index([order_id], map: "order_purchases_order_id_foreign")
+  @@index([payment_method_id], map: "order_purchases_payment_method_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model orders {
+  id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id      BigInt            @db.UnsignedBigInt
+  options         String?           @db.LongText
+  quantity        Int
+  status          orders_status     @default(Pending)
+  created_at      DateTime?         @db.Timestamp(0)
+  updated_at      DateTime?         @db.Timestamp(0)
+  order_purchases order_purchases[]
+  companies       companies         @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "orders_company_id_foreign")
+
+  @@index([company_id], map: "orders_company_id_foreign")
+}
+
+model password_reset_tokens {
+  email      String    @id @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model payment_methods {
+  id              BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  name            payment_methods_name
+  status          payment_methods_status @default(Active)
+  created_at      DateTime?              @db.Timestamp(0)
+  updated_at      DateTime?              @db.Timestamp(0)
+  deleted_at      DateTime?              @db.Timestamp(0)
+  order_purchases order_purchases[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model products {
+  id                  BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id          BigInt            @db.UnsignedBigInt
+  category_product_id BigInt            @db.UnsignedBigInt
+  name                String            @db.VarChar(255)
+  description         String            @db.Text
+  price               Decimal           @db.Decimal(8, 2)
+  status              products_status   @default(Available)
+  created_at          DateTime?         @db.Timestamp(0)
+  updated_at          DateTime?         @db.Timestamp(0)
+  deleted_at          DateTime?         @db.Timestamp(0)
+  additionals         additionals[]
+  category_products   category_products @relation(fields: [category_product_id], references: [id], onUpdate: Restrict, map: "products_category_product_id_foreign")
+  companies           companies         @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "products_company_id_foreign")
+
+  @@index([category_product_id], map: "products_category_product_id_foreign")
+  @@index([company_id], map: "products_company_id_foreign")
+}
+
+model sessions {
+  id            String  @id @db.VarChar(255)
+  user_id       BigInt? @db.UnsignedBigInt
+  ip_address    String? @db.VarChar(45)
+  user_agent    String? @db.Text
+  payload       String  @db.LongText
+  last_activity Int
+
+  @@index([last_activity], map: "sessions_last_activity_index")
+  @@index([user_id], map: "sessions_user_id_index")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model states {
+  id         BigInt        @id @default(autoincrement()) @db.UnsignedBigInt
+  name       String        @db.VarChar(255)
+  status     states_status @default(Active)
+  created_at DateTime?     @db.Timestamp(0)
+  updated_at DateTime?     @db.Timestamp(0)
+  cities     cities[]
+  clients    clients[]
+  companies  companies[]
+}
+
+model users {
+  id                BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  name              String             @db.VarChar(255)
+  email             String             @unique(map: "users_email_unique") @db.VarChar(255)
+  email_verified_at DateTime?          @db.Timestamp(0)
+  password          String             @db.VarChar(255)
+  remember_token    String?            @db.VarChar(100)
+  created_at        DateTime?          @db.Timestamp(0)
+  updated_at        DateTime?          @db.Timestamp(0)
+  clients           clients[]
+  deliveries        deliveries[]
+  employee_details  employee_details[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model company_holidays {
+  id           BigInt                       @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id   BigInt                       @db.UnsignedBigInt
+  holiday_date DateTime                     @db.Date
+  is_accepted  company_holidays_is_accepted
+  created_at   DateTime?                    @db.Timestamp(0)
+  updated_at   DateTime?                    @db.Timestamp(0)
+  companies    companies                    @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "company_holidays_company_id_foreign")
+
+  @@index([company_id], map: "company_holidays_company_id_foreign")
+}
+
+model model_has_permissions {
+  permission_id BigInt      @db.UnsignedBigInt
+  model_type    String      @db.VarChar(255)
+  model_id      BigInt      @db.UnsignedBigInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "model_has_permissions_permission_id_foreign")
+
+  @@id([permission_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_permissions_model_id_model_type_index")
+}
+
+model model_has_roles {
+  role_id    BigInt @db.UnsignedBigInt
+  model_type String @db.VarChar(255)
+  model_id   BigInt @db.UnsignedBigInt
+  roles      roles  @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "model_has_roles_role_id_foreign")
+
+  @@id([role_id, model_id, model_type])
+  @@index([model_id, model_type], map: "model_has_roles_model_id_model_type_index")
+}
+
+model permissions {
+  id                    BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  name                  String                  @db.VarChar(255)
+  guard_name            String                  @db.VarChar(255)
+  created_at            DateTime?               @db.Timestamp(0)
+  updated_at            DateTime?               @db.Timestamp(0)
+  model_has_permissions model_has_permissions[]
+  role_has_permissions  role_has_permissions[]
+
+  @@unique([name, guard_name], map: "permissions_name_guard_name_unique")
+}
+
+model role_has_permissions {
+  permission_id BigInt      @db.UnsignedBigInt
+  role_id       BigInt      @db.UnsignedBigInt
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "role_has_permissions_permission_id_foreign")
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "role_has_permissions_role_id_foreign")
+
+  @@id([permission_id, role_id])
+  @@index([role_id], map: "role_has_permissions_role_id_foreign")
+}
+
+model roles {
+  id                   BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
+  name                 String                 @db.VarChar(255)
+  guard_name           String                 @db.VarChar(255)
+  created_at           DateTime?              @db.Timestamp(0)
+  updated_at           DateTime?              @db.Timestamp(0)
+  model_has_roles      model_has_roles[]
+  role_has_permissions role_has_permissions[]
+
+  @@unique([name, guard_name], map: "roles_name_guard_name_unique")
+}
+
+enum payment_methods_name {
+  Stripe
+  Paypal
+  Bank
+  TCD
+  Cash
+}
+
+enum states_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum payment_methods_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum business_hours_day {
+  Domingo
+  Lunes
+  Martes
+  Mi_rcoles @map("Miércoles")
+  Jueves
+  Viernes
+  S_bado    @map("Sábado")
+}
+
+enum geolocations_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum cities_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum category_kitchens_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum offers_status {
+  Active
+  Inactive
+}
+
+enum orders_status {
+  Pending
+  Approved
+  Rejected
+}
+
+enum category_products_status {
+  Active
+  Inactive
+}
+
+enum employee_details_job_type {
+  Full_time @map("Full-time")
+  Part_time @map("Part-time")
+  Volunteer
+  Intern
+}
+
+enum additionals_status {
+  Available
+  Exhausted
+  Inactive
+}
+
+enum deliveries_order_status {
+  Pending
+  Approved
+  Rejected
+  Delayed
+}
+
+enum business_hours_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum products_status {
+  Available
+  Exhausted
+  Inactive
+}
+
+enum order_purchases_status {
+  Pending
+  Approved
+  Rejected
+}
+
+enum employee_details_status {
+  Active
+  Inactive
+  Vacation
+  Dismissal
+  Permission
+  Repose
+}
+
+enum companies_type_company {
+  Restaurantes_y_Comida           @map("Restaurantes y Comida")
+  Tiendas_de_Alimentos_y_Bebidas  @map("Tiendas de Alimentos y Bebidas")
+  Farmacias_y_Productos_de_Salud  @map("Farmacias y Productos de Salud")
+  Retail_y_Moda                   @map("Retail y Moda")
+  Electronica_y_Tecnologia        @map("Electronica y Tecnologia")
+  Hogar_y_Decoracion              @map("Hogar y Decoracion")
+  Librerias_y_Papelerias          @map("Librerias y Papelerias")
+  Servicios_de_Entretenimiento    @map("Servicios de Entretenimiento")
+  Floristerias
+  Servicios_Especializados        @map("Servicios Especializados")
+  Mascotas_y_Animales             @map("Mascotas y Animales")
+  Servicios_de_Oficina_y_Empresas @map("Servicios de Oficina y Empresas")
+  Other
+}
+
+enum clients_status {
+  Active
+  Inactive
+}
+
+enum companies_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum company_holidays_is_accepted {
+  Yes
+  No
+}
