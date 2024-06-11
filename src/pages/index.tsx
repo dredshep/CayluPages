@@ -7,6 +7,7 @@ import AppDownloadCTA from "@components/sections/AppDownloadCTA";
 import TrabajaconNosotrosCTA from "@components/sections/TrabajaConNosotrosCTA";
 import ReviewCard from "@components/cards/ReviewCard";
 import reviews from "@/dummyData/reviews";
+import Image from "next/image";
 
 function Navbar() {
   return (
@@ -108,6 +109,7 @@ export default function Home() {
           </button>
         </div>
       </div>
+      <Image src="http://192.168.22.118/assets/Baseball Bat.jpg" alt="baseball bat" width={500} height={500} />
     </div>
   );
 }

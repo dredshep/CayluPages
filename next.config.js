@@ -8,8 +8,14 @@ const nextConfig = {
         hostname: "placehold.co",
         port: "",
       },
+      {
+        protocol: "http",
+        hostname: "192.168.22.118",
+        port: "",
+      },
     ],
   },
 };
 
-export default nextConfig;
+// export default nextConfig;
+module.exports = nextConfig;
