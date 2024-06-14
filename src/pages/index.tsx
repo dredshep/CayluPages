@@ -39,10 +39,10 @@ function Navbar() {
 export default function Home() {
   return (
     <div className="bg-white">
-      <div className="min-h-screen  bg-frontpage-banner h-full">
+      <div className="min-h-screen  bg-frontpage-banner bg-cover h-full">
         <Navbar />
         <div className="flex flex-col justify-center h-[calc(100vh-128px)] w-full px-[129px] gap-6">
-          <h1 className="text-white text-7xl font-bold">
+          <h1 className="text-white text-5xl xl:text-6xl 2xl:text-7xl font-bold">
             Lo mejor, ¡cerca de ti!
           </h1>
           <div className="flex gap-5">
@@ -51,7 +51,7 @@ export default function Home() {
                 <LocationIcon className="text-black h-11 w-11" />
               </div>
               <input
-                className="w-[860px] h-[97px] bg-white text-[34px] outline-none"
+                className="w-[600px] 2xl:w-[860px] h-[97px] bg-white text-[34px] outline-none"
                 placeholder="Paseo Prai de Silgar, 3, Sanxenxo"
               />
             </div>
@@ -68,9 +68,9 @@ export default function Home() {
         <h1 className="text-black text-7xl font-bold mx-auto leading-normal">
           Popular en tu zona
         </h1>
-        <div className="flex gap-5">
+        <div className="flex gap-5 flex-wrap">
           {popularEnTuZona.map((restaurant, index) => (
-            <div key={index} className="w-1/3 px-2 mb-4">
+            <div key={index} className="flex-1 px-2 mb-4">
               <RestaurantCard {...restaurant} />
             </div>
           ))}
@@ -82,9 +82,9 @@ export default function Home() {
         <h1 className="text-black text-7xl font-bold mx-auto leading-normal">
           Ofertas de hoy
         </h1>
-        <div className="flex gap-5">
+        <div className="flex gap-5 flex-wrap">
           {ofertasDeHoy.map((restaurant, index) => (
-            <div key={index} className="w-1/3 px-2 mb-4">
+            <div key={index} className="flex-1 px-2 mb-4">
               <RestaurantCard {...restaurant} />
             </div>
           ))}
@@ -92,14 +92,14 @@ export default function Home() {
       </div>
 
       <hr className="w-full h-0.5 bg-neutral-400 mt-[51px]" />
-      <AppDownloadCTA />
+      {/* <AppDownloadCTA /> */}
       <TrabajaconNosotrosCTA />
-      <div className="h-[calc(100vh-128px)] w-full">
+      <div className="w-full mb-12">
         <div className="flex flex-col justify-center h-full w-full px-[129px] gap-[71px]">
           <h1 className="text-black text-7xl font-bold mx-auto">
             Nuestras reseñas
           </h1>
-          <div className="flex gap-5">
+          <div className="flex gap-5 flex-wrap justify-center">
             {reviews.map((review, index) => (
               <ReviewCard review={review} key={index} />
             ))}
@@ -109,7 +109,7 @@ export default function Home() {
           </button>
         </div>
       </div>
-      <Image src="http://192.168.22.118/assets/Baseball Bat.jpg" alt="baseball bat" width={500} height={500} />
+      {/* <Image src="http://192.168.22.118/assets/Baseball Bat.jpg" alt="baseball bat" width={500} height={500} /> */}
     </div>
   );
 }
