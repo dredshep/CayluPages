@@ -16,7 +16,7 @@ interface ReviewCardProps {
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
   return (
-    <div className="h-[383px] w-[396px] shadow-xl shadow-neutral-300 rounded-[32px] p-6">
+    <div className="h-80 w-80 4xl:h-[383px] 4xl:w-[396px] shadow-xl shadow-neutral-300 rounded-[32px] p-6">
       <div className="flex gap-5">
         {/* Avatar circle */}
         <div className="w-[60px] h-[60px]">
