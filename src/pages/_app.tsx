@@ -7,7 +7,7 @@ const noto = Noto_Sans({ subsets: ["latin"] });
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <main className={noto.className}>
-      <Component {...pageProps} />;
+      <Component {...pageProps} />
       <Footer />
     </main>
   );
