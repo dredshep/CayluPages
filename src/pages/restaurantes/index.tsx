@@ -11,6 +11,9 @@ import RestaurantGrid from "@components/sections/restaurants/RestaurantGrid";
 import AppNavbar from "@/components/sections/AppNavbar";
 import Head from "next/head";
 
+import useFetch from "@/components/meta/hooks/useFetch";
+import { companies } from "@prisma/client";
+
 function RoundCategory({
   href,
   Icon,

@@ -2,6 +2,10 @@ import styled from "styled-components";
 import RestaurantCard from "@components/cards/RestaurantCard";
 import restaurantCardData from "@/dummyData/restaurantsCardData";
 import Link from "next/link";
+import useFetch from "@/components/meta/hooks/useFetch";
+import { companies } from "@prisma/client";
+import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
+import { JoinedCompany } from "@/pages/api/companies";
 
 const gridWidth = 492;
 const gapY = 56;
@@ -28,24 +32,32 @@ const Grid = styled.div`
 `;
 
 const RestaurantGrid = () => {
+  const comps = useFetch<JoinedCompany[]>("/api/companies");
   return (
-    <GridContainer>
-      <Grid>
-        {restaurantCardData.map((data, index) => (
-          <Link href={`/restaurantes/menu`} key={index}>
-            <RestaurantCard
-              key={index}
-              imageUrl={data.imageUrl}
-              altText={data.altText}
-              name={data.name}
-              rating={data.rating}
-              cuisineType={data.cuisineType}
-              deliveryTime={data.deliveryTime}
-            />
-          </Link>
-        ))}
-      </Grid>
-    </GridContainer>
+    comps && (
+      <GridContainer>
+        <Grid>
+          {comps.map((data, index) => (
+            <Link href={`/restaurantes/menu`} key={index}>
+              <RestaurantCard
+                key={index}
+                imageUrl={getPlaceholderImageUrl({
+                  width: 492,
+                  height: 400,
+                  bgColor: "skyblue",
+                  textColor: "white",
+                })}
+                altText={data.description || ""}
+                name={data.name}
+                rating={5}
+                cuisineType={data.type_company.replace(/_/g, " ")}
+                deliveryTime={"5 mins"}
+              />
+            </Link>
+          ))}
+        </Grid>
+      </GridContainer>
+    )
   );
 };
 

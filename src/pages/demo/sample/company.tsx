@@ -1,13 +1,10 @@
 import StarIcon from "@/components/icons/StarIcon";
-import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import Image from "next/image";
 import AppNavbar from "@/components/sections/AppNavbar";
 import banner from "@/assets/hamburguesas/banner.png";
 import useFetch from "@/components/meta/hooks/useFetch";
 // import hamburguesas from "@/dummyData/hamburguesas";
-import { companies } from "@prisma/client";
-import { JoinedCompany } from "../api/companies";
-
+import { JoinedCompany } from "../../api/companies";
 export default function RestaurantMenu() {
   const comps = useFetch<JoinedCompany[]>("/api/companies");
   const comp = comps?.[0];
@@ -67,7 +64,7 @@ export default function RestaurantMenu() {
                 <div className="flex flex-col max-w-[300px] justify-center px-[25px]">
                   <h2 className="text-lg font-semibold">{product.name}</h2>
                   <div className="flex gap-2 items-center">
-                    <p className="text-base">{product.price}</p>
+                    {/* <p className="text-base">{product.price}</p> */}
                     <p className="text-gray-400 text-lg">€</p>
                   </div>
                   <p className="text-[13px] text-gray-400">
@@ -75,13 +72,13 @@ export default function RestaurantMenu() {
                   </p>
                 </div>
                 <div className="w-[300px] h-[163px] bg-gray-300 rounded-r-[7px] shrink-0 overflow-hidden">
-                  <Image
+                  {/* <Image
                     src={product.imageUrl}
                     width={300}
                     height={163}
                     alt={product.name}
                     className="object-cover object-center h-full"
-                  />
+                  /> */}
                 </div>
               </div>
             ))}

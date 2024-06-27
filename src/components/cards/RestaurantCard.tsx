@@ -59,7 +59,7 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
           quality={100}
         />
       </div>
-      <div className="max-h-max leading-5 3xl:leading-[1.324] flex flex-col items-center mt-3">
+      <div className="max-h-max leading-5 3xl:leading-[1.324] flex flex-col items-center mt-3 gap-2">
         <div className="flex justify-between w-full flex-row">
           <div className="text-black leading-[36px] text-[40px] font-bold whitespace-nowrap">
             {name}
