@@ -8,8 +8,8 @@ import SushiIcon from "@components/icons/restaurantes/foodCategories/SushiIcon";
 import ArrocesIcon from "@components/icons/restaurantes/foodCategories/ArrocesIcon";
 import PuntosSuspensivosIcon from "@components/icons/restaurantes/foodCategories/PuntosSuspensivosIcon";
 import RestaurantGrid from "@components/sections/restaurants/RestaurantGrid";
+import Footer from "@/components/sections/Footer";
 import AppNavbar from "@/components/sections/AppNavbar";
-import Head from "next/head";
 
 function RoundCategory({
   href,
@@ -36,9 +36,6 @@ function RoundCategory({
 export default function Restaurantes() {
   return (
     <div className="bg-white min-h-screen pb-[106px]">
-      <Head>
-        <title>Restaurantes | Caylu</title>
-      </Head>
       <AppNavbar />
       <div className="flex items-center justify-between mt-[calc(142px-32px)]">
         <CaretLeft />

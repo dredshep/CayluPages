@@ -323,6 +323,7 @@ model products {
   id                  BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
   company_id          BigInt            @db.UnsignedBigInt
   category_product_id BigInt            @db.UnsignedBigInt
+  image               String?           @db.VarChar(255)
   name                String            @db.VarChar(255)
   description         String            @db.Text
   price               Decimal           @db.Decimal(8, 2)
