@@ -1,4 +1,4 @@
-import { JoinedCompany } from "@/pages/api/companies";
+import { JoinedCompany } from "@/types/JoinedCompany";
 import { useState, useEffect } from "react";
 
 // The hook that fetches business hours based on the current day or a specific day

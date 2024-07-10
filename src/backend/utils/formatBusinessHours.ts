@@ -1,4 +1,4 @@
-import { JoinedCompany } from "@/pages/api/companies";
+import { JoinedCompany } from "@/types/JoinedCompany";
 
 type BusinessHour = JoinedCompany["business_hours"][0];
 

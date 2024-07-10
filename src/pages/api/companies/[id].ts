@@ -2,11 +2,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
 import JSONbig from "json-bigint";
+import { JoinedCompany } from "@/types/JoinedCompany";
 const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse
 ) {
   try {
     const _companyId = req.query;
@@ -29,7 +30,10 @@ export default async function handler(
         states: true,
       },
     });
-    res.status(200).json(JSONbig.parse(JSONbig.stringify(companies)));
+    const response: JoinedCompany[] = JSONbig.parse(
+      JSONbig.stringify(companies as JoinedCompany[])
+    );
+    res.status(200).json(response);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

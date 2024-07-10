@@ -5,7 +5,7 @@ import Link from "next/link";
 import useFetch from "@/components/meta/hooks/useFetch";
 import { companies } from "@prisma/client";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
-import { JoinedCompany } from "@/pages/api/companies";
+import { JoinedCompany } from "@/types/JoinedCompany";
 
 const gridWidth = 492;
 const gapY = 56;
@@ -33,32 +33,30 @@ const Grid = styled.div`
 
 const RestaurantGrid = () => {
   const comps = useFetch<JoinedCompany[]>("/api/companies");
-  return (
-    comps && (
-      <GridContainer>
-        <Grid>
-          {comps.map((data, index) => (
-            <Link href={`/restaurantes/menu`} key={index}>
-              <RestaurantCard
-                key={index}
-                imageUrl={getPlaceholderImageUrl({
-                  width: 492,
-                  height: 400,
-                  bgColor: "skyblue",
-                  textColor: "white",
-                })}
-                altText={data.description || ""}
-                name={data.name}
-                rating={5}
-                cuisineType={data.type_company.replace(/_/g, " ")}
-                deliveryTime={"5 mins"}
-              />
-            </Link>
-          ))}
-        </Grid>
-      </GridContainer>
-    )
-  );
+  return Array.isArray(comps) === true ? (
+    <GridContainer>
+      <Grid>
+        {comps.map((data, index) => (
+          <Link href={`/restaurantes/${data.id}`} key={index}>
+            <RestaurantCard
+              key={index}
+              imageUrl={getPlaceholderImageUrl({
+                width: 492,
+                height: 400,
+                bgColor: "skyblue",
+                textColor: "white",
+              })}
+              altText={data.description || ""}
+              name={data.name}
+              rating={5}
+              cuisineType={data.type_company.replace(/_/g, " ")}
+              deliveryTime={"5 mins"}
+            />
+          </Link>
+        ))}
+      </Grid>
+    </GridContainer>
+  ) : undefined;
 };
 
 export default RestaurantGrid;

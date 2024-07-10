@@ -1,42 +1,13 @@
 // Path: src/pages/api/companies/index.ts
 import { NextApiRequest, NextApiResponse } from "next";
-import {
-  additionals,
-  business_hours,
-  category_products,
-  cities,
-  companies,
-  company_holidays,
-  geolocations,
-  offers,
-  order_purchases,
-  orders,
-  PrismaClient,
-  products,
-  states,
-} from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import JSONbig from "json-bigint";
+import { JoinedCompany } from "@/types/JoinedCompany";
 const prisma = new PrismaClient();
 
-export type JoinedCompany = companies & {
-  business_hours: business_hours[];
-  additionals: additionals[];
-  category_products: category_products[];
-  cities: cities;
-  company_holidays: company_holidays[];
-  geolocations: geolocations;
-  offers: offers[];
-  order_purchases: order_purchases[];
-  orders: orders[];
-  products: products[];
-  states: states;
-};
-export default async function handler(
-  _: NextApiRequest,
-  res: NextApiResponse,
-) {
+export default async function handler(_: NextApiRequest, res: NextApiResponse) {
   try {
-    const companies = await prisma.companies.findMany({
+    const companies = (await prisma.companies.findMany({
       include: {
         business_hours: true,
         additionals: true,
@@ -50,7 +21,7 @@ export default async function handler(
         orders: true,
         states: true,
       },
-    }) as JoinedCompany[];
+    })) as JoinedCompany[];
     // }) as JoinedCompany[];
     res.status(200).json(JSONbig.parse(JSONbig.stringify(companies)));
   } catch (error: any) {

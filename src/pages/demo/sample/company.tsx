@@ -4,7 +4,7 @@ import AppNavbar from "@/components/sections/AppNavbar";
 import banner from "@/assets/hamburguesas/banner.png";
 import useFetch from "@/components/meta/hooks/useFetch";
 // import hamburguesas from "@/dummyData/hamburguesas";
-import { JoinedCompany } from "../../api/companies";
+import { JoinedCompany } from "@/types";
 export default function RestaurantMenu() {
   const comps = useFetch<JoinedCompany[]>("/api/companies");
   const comp = comps?.[0];
