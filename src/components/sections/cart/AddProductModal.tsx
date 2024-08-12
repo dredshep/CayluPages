@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useCartStore } from "@/store/useCartStore";
 import { CartProduct } from "@/types/CartProduct";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
+import Image from "next/image";
 
 interface AddProductModalProps {
   product: CartProduct;
@@ -89,9 +90,9 @@ export default function AddProductModal({
           </button>
         </div>
         <div className="flex justify-center items-center mb-4">
-          <img
+          <Image
             src={
-              product.image ||
+              // product.image ||
               getPlaceholderImageUrl({
                 width: 300,
                 height: 200,
@@ -101,6 +102,8 @@ export default function AddProductModal({
             }
             alt="Product"
             className="rounded-lg shadow-sm max-w-full h-auto"
+            width={300}
+            height={200}
           />
         </div>
         <div

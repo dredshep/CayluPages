@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import HamburgerIcon from "@components/icons/navbar/HamburgerIcon";
 import LocationIcon from "@components/icons/navbar/LocationIcon";
@@ -11,6 +11,12 @@ export default function AppNavbar() {
   const [isPopoverVisible, setPopoverVisible] = useState(false);
   const cartProductCount = useCartStore((state) => state.cart?.products.length);
 
+  const [browserSideCartProductCount, setBrowserSideCartProductCount] =
+    useState<number>(0);
+
+  useEffect(() => {
+    setBrowserSideCartProductCount(cartProductCount ?? 0);
+  }, [cartProductCount]);
   const handleCartClick = () => {
     setPopoverVisible((prev) => !prev);
   };
@@ -51,7 +57,7 @@ export default function AppNavbar() {
       >
         <CartIcon />
         <div className="absolute -top-2 -right-2 bg-teal-400 h-[31px] w-[31px] text-black font-bold rounded-full flex items-center justify-center">
-          {cartProductCount}
+          {browserSideCartProductCount}
         </div>
       </div>
       {isPopoverVisible && <CartPopover onClose={handleClosePopover} />}

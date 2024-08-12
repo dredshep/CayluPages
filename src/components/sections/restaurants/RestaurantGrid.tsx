@@ -6,6 +6,7 @@ import useFetch from "@/components/meta/hooks/useFetch";
 import { companies } from "@prisma/client";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import { JoinedCompany } from "@/types/JoinedCompany";
+import { useEffect, useState } from "react";
 
 const gridWidth = 492;
 const gapY = 56;
@@ -33,7 +34,14 @@ const Grid = styled.div`
 
 const RestaurantGrid = () => {
   const comps = useFetch<JoinedCompany[]>("/api/companies");
-  return Array.isArray(comps) === true ? (
+  const [ready, setReady] = useState(true);
+  // render a loading screen, sleep a sec and then render the grid
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setReady(true);
+  //   }, 1000);
+  // }, []);
+  return ready && Array.isArray(comps) === true ? (
     <GridContainer>
       <Grid>
         {comps.map((data, index) => (
@@ -56,7 +64,9 @@ const RestaurantGrid = () => {
         ))}
       </Grid>
     </GridContainer>
-  ) : undefined;
+  ) : (
+    <div>Loading...</div>
+  );
 };
 
 export default RestaurantGrid;

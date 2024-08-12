@@ -9,7 +9,7 @@ export default function Products() {
     <MetaLayout>
       <h1 className="mb-4 text-3xl font-semibold dark:text-white">Products</h1>
       <pre className="text-white">{JSON.stringify(prods?.[0], null, 2)}</pre>
-      {prods ? <JsonTable data={prods} /> : <p>Loading data...</p>}
+      {prods ? <JsonTable data={prods} /> : <div>Loading data...</div>}
     </MetaLayout>
   );
 }

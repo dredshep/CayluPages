@@ -9,19 +9,27 @@ datasource db {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model additionals {
-  id         BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
-  company_id BigInt             @db.UnsignedBigInt
-  product_id BigInt             @db.UnsignedBigInt
-  name       String             @db.VarChar(255)
-  price      Decimal            @db.Decimal(8, 2)
-  status     additionals_status @default(Available)
-  created_at DateTime?          @db.Timestamp(0)
-  updated_at DateTime?          @db.Timestamp(0)
-  companies  companies          @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "additionals_company_id_foreign")
-  products   products           @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "additionals_product_id_foreign")
+  id                 BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id         BigInt               @db.UnsignedBigInt
+  product_id         BigInt               @db.UnsignedBigInt
+  categoryproduct_id BigInt               @db.UnsignedBigInt
+  name               String               @db.VarChar(255)
+  sku                String               @db.VarChar(255)
+  amount             Int
+  price              Decimal              @db.Decimal(10, 2)
+  currency           additionals_currency @default(USD)
+  status             additionals_status   @default(Available)
+  created_at         DateTime?            @db.Timestamp(0)
+  updated_at         DateTime?            @db.Timestamp(0)
+  deleted_at         DateTime?            @db.Timestamp(0)
+  category_products  category_products    @relation(fields: [categoryproduct_id], references: [id], onUpdate: Restrict, map: "additionals_categoryproduct_id_foreign")
+  companies          companies            @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "additionals_company_id_foreign")
+  products           products             @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "additionals_product_id_foreign")
+  order_items        order_items[]
 
   @@index([company_id], map: "additionals_company_id_foreign")
   @@index([product_id], map: "additionals_product_id_foreign")
+  @@index([categoryproduct_id], map: "additionals_categoryproduct_id_foreign")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -53,17 +61,6 @@ model cache_locks {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-model category_kitchens {
-  id          BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
-  name        String                   @db.VarChar(255)
-  description String                   @db.Text
-  status      category_kitchens_status @default(Active)
-  created_at  DateTime?                @db.Timestamp(0)
-  updated_at  DateTime?                @db.Timestamp(0)
-  deleted_at  DateTime?                @db.Timestamp(0)
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model category_products {
   id          BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
   company_id  BigInt                   @db.UnsignedBigInt
@@ -73,6 +70,7 @@ model category_products {
   created_at  DateTime?                @db.Timestamp(0)
   updated_at  DateTime?                @db.Timestamp(0)
   deleted_at  DateTime?                @db.Timestamp(0)
+  additionals additionals[]
   companies   companies                @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "category_products_company_id_foreign")
   products    products[]
 
@@ -124,7 +122,7 @@ model clients {
 model companies {
   id                BigInt                 @id @default(autoincrement()) @db.UnsignedBigInt
   name              String                 @db.VarChar(255)
-  logo              String                 @db.VarChar(255)
+  logo              String?                @db.VarChar(255)
   address           String                 @db.VarChar(255)
   phone             String                 @db.VarChar(255)
   email             String                 @db.VarChar(255)
@@ -150,6 +148,7 @@ model companies {
   order_purchases   order_purchases[]
   orders            orders[]
   products          products[]
+  warehouses        warehouses[]
 
   @@index([city_id], map: "companies_city_id_foreign")
   @@index([geolocation_id], map: "companies_geolocation_id_foreign")
@@ -290,11 +289,10 @@ model order_purchases {
 model orders {
   id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
   company_id      BigInt            @db.UnsignedBigInt
-  options         String?           @db.LongText
-  quantity        Int
   status          orders_status     @default(Pending)
   created_at      DateTime?         @db.Timestamp(0)
   updated_at      DateTime?         @db.Timestamp(0)
+  order_items     order_items[]
   order_purchases order_purchases[]
   companies       companies         @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "orders_company_id_foreign")
 
@@ -323,20 +321,27 @@ model products {
   id                  BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
   company_id          BigInt            @db.UnsignedBigInt
   category_product_id BigInt            @db.UnsignedBigInt
-  image               String?           @db.VarChar(255)
+  warehouse_id        BigInt            @db.UnsignedBigInt
+  sku                 String            @db.VarChar(255)
   name                String            @db.VarChar(255)
+  product_image       String?           @db.VarChar(255)
   description         String            @db.Text
-  price               Decimal           @db.Decimal(8, 2)
+  amount              Int
+  price               Decimal           @db.Decimal(10, 2)
+  currency            products_currency @default(USD)
   status              products_status   @default(Available)
   created_at          DateTime?         @db.Timestamp(0)
   updated_at          DateTime?         @db.Timestamp(0)
   deleted_at          DateTime?         @db.Timestamp(0)
   additionals         additionals[]
+  order_items         order_items[]
   category_products   category_products @relation(fields: [category_product_id], references: [id], onUpdate: Restrict, map: "products_category_product_id_foreign")
   companies           companies         @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "products_company_id_foreign")
+  warehouses          warehouses        @relation(fields: [warehouse_id], references: [id], onUpdate: Restrict, map: "products_warehouse_id_foreign")
 
   @@index([category_product_id], map: "products_category_product_id_foreign")
   @@index([company_id], map: "products_company_id_foreign")
+  @@index([warehouse_id], map: "products_warehouse_id_foreign")
 }
 
 model sessions {
@@ -444,6 +449,43 @@ model roles {
   @@unique([name, guard_name], map: "roles_name_guard_name_unique")
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model order_items {
+  id            BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  order_id      BigInt       @db.UnsignedBigInt
+  product_id    BigInt?      @db.UnsignedBigInt
+  additional_id BigInt?      @db.UnsignedBigInt
+  quantity      Int
+  price         Decimal      @db.Decimal(8, 2)
+  created_at    DateTime?    @db.Timestamp(0)
+  updated_at    DateTime?    @db.Timestamp(0)
+  deleted_at    DateTime?    @db.Timestamp(0)
+  additionals   additionals? @relation(fields: [additional_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "order_items_additional_id_foreign")
+  orders        orders       @relation(fields: [order_id], references: [id], onUpdate: Restrict, map: "order_items_order_id_foreign")
+  products      products?    @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "order_items_product_id_foreign")
+
+  @@index([additional_id], map: "order_items_additional_id_foreign")
+  @@index([order_id], map: "order_items_order_id_foreign")
+  @@index([product_id], map: "order_items_product_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model warehouses {
+  id             BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
+  name           String                    @db.VarChar(255)
+  description    String                    @db.Text
+  company_id     BigInt                    @db.UnsignedBigInt
+  type_warehouse warehouses_type_warehouse @default(Almacen)
+  status         warehouses_status         @default(Active)
+  created_at     DateTime?                 @db.Timestamp(0)
+  updated_at     DateTime?                 @db.Timestamp(0)
+  deleted_at     DateTime?                 @db.Timestamp(0)
+  products       products[]
+  companies      companies                 @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "warehouses_company_id_foreign")
+
+  @@index([company_id], map: "warehouses_company_id_foreign")
+}
+
 enum payment_methods_name {
   Stripe
   Paypal
@@ -481,12 +523,6 @@ enum geolocations_status {
 }
 
 enum cities_status {
-  Active
-  Inactive
-  Trash
-}
-
-enum category_kitchens_status {
   Active
   Inactive
   Trash
@@ -585,4 +621,27 @@ enum companies_status {
 enum company_holidays_is_accepted {
   Yes
   No
+}
+
+enum warehouses_type_warehouse {
+  Almacen
+  Cocina
+}
+
+enum warehouses_status {
+  Active
+  Inactive
+  Trash
+}
+
+enum additionals_currency {
+  USD
+  EUR
+  COP
+}
+
+enum products_currency {
+  USD
+  EUR
+  COP
 }

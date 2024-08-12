@@ -13,7 +13,7 @@ export default function Companies() {
   return (
     <MetaLayout>
       <h1 className="mb-4 text-3xl font-semibold dark:text-white">Companies</h1>
-      {comps ? <JsonTable data={comps} /> : <p>Loading data...</p>}
+      {comps ? <JsonTable data={comps} /> : <div>Loading data...</div>}
     </MetaLayout>
   );
 }

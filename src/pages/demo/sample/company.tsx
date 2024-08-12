@@ -9,7 +9,7 @@ export default function RestaurantMenu() {
   const comps = useFetch<JoinedCompany[]>("/api/companies");
   const comp = comps?.[0];
   return !comp ? (
-    <p>Loading data...</p>
+    <div>Loading data...</div>
   ) : (
     <div className="bg-white min-h-screen max-w-[1685px] mx-auto pb-[194px]">
       <AppNavbar />

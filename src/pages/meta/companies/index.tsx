@@ -10,7 +10,7 @@ export default function Companies() {
     <MetaLayout>
       <h1 className="mb-4 text-3xl font-semibold dark:text-white">Companies</h1>
       <pre className="text-white">{JSON.stringify(comps?.[0], null, 2)}</pre>
-      {comps ? <JsonTable data={comps} /> : <p>Loading data...</p>}
+      {comps ? <JsonTable data={comps} /> : <div>Loading data...</div>}
     </MetaLayout>
   );
 }

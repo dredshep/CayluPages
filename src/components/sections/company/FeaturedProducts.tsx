@@ -45,7 +45,7 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({ products }) => {
           <div className="w-[300px] h-[163px] rounded-r-[7px] overflow-hidden">
             <Image
               src={
-                product.image ||
+                // product.image ||
                 getPlaceholderImageUrl({
                   width: 300,
                   height: 163,
@@ -65,7 +65,13 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({ products }) => {
         <AddProductModal
           product={{
             p_id: Number(selectedProduct.id),
-            image: selectedProduct.image ?? undefined,
+            // image: selectedProduct.image ?? undefined,
+            image: getPlaceholderImageUrl({
+              width: 300,
+              height: 200,
+              bgColor: "e0e0e0",
+              textColor: "757575",
+            }),
             company_id: Number(selectedProduct.company_id),
             name: selectedProduct.name,
             price: parseFloat(selectedProduct.price.toString()),
