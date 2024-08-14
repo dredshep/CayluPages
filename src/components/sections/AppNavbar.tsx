@@ -5,11 +5,13 @@ import LocationIcon from "@components/icons/navbar/LocationIcon";
 import MagnifyingGlassIcon from "@components/icons/navbar/MagnifyingGlassIcon";
 import CartIcon from "@components/icons/navbar/CartIcon";
 import CartPopover from "@components/sections/cart/CartPopover";
-import { useCartStore } from "@/store/useCartStore";
+import { useCartStore2 } from "@/store/useCartStore2";
 
 export default function AppNavbar() {
   const [isPopoverVisible, setPopoverVisible] = useState(false);
-  const cartProductCount = useCartStore((state) => state.cart?.products.length);
+  const cartProductCount = useCartStore2(
+    (state) => state.cart?.products?.length ?? 0
+  );
 
   const [browserSideCartProductCount, setBrowserSideCartProductCount] =
     useState<number>(0);

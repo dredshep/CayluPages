@@ -1,8 +1,8 @@
 import { FC } from "react";
-import { useCartStore } from "@/store/useCartStore";
+import { useCartStore2 } from "@/store/useCartStore2";
 
 const CartSummary: FC = () => {
-  const cartArray = useCartStore.getState().cart?.products ?? [];
+  const cartArray = useCartStore2.getState().cart?.products ?? [];
 
   return (
     <div className="flex justify-between items-center mt-[35px]">

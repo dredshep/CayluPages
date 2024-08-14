@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useCartStore } from "@/store/useCartStore";
-import { CartProduct } from "@/types/CartProduct";
+import { useCartStore2 } from "@/store/useCartStore2";
+import { CartProduct, Additional } from "@/types/CartProduct";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import Image from "next/image";
-import { additionals_currency } from "@prisma/client";
 
 interface AddProductModalProps {
   product: CartProduct;
@@ -16,10 +15,21 @@ export default function AddProductModal({
   onClose,
 }: AddProductModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const { cart, addProduct, updateProductQuantity } = useCartStore();
-  const existingProduct = cart?.products.find((p) => p.p_id === product.p_id);
+  const { cart, addProduct, updateProductQuantity, updateProductAdditionals } =
+    useCartStore2();
+  const existingProduct = cart?.products?.find((p) => p.p_id === product.p_id);
   const [quantity, setQuantity] = useState<number>(
     existingProduct ? existingProduct.quantity : 1
+  );
+  const [additionalQuantities, setAdditionalQuantities] = useState<{
+    [key: string]: number;
+  }>(
+    existingProduct
+      ? existingProduct.additionals.reduce((acc, additional) => {
+          acc[additional.id.toString()] = additional.quantity || 0;
+          return acc;
+        }, {} as { [key: string]: number })
+      : {}
   );
 
   const handleClickOutside = (event: MouseEvent) => {
@@ -32,17 +42,49 @@ export default function AddProductModal({
     setQuantity((prev) => Math.max(1, prev + change));
   };
 
+  const handleAdditionalChange = (additionalId: bigint, change: number) => {
+    setAdditionalQuantities((prev) => ({
+      ...prev,
+      [additionalId.toString()]: Math.max(
+        0,
+        (prev[additionalId.toString()] || 0) + change
+      ),
+    }));
+  };
+
+  const calculateTotalPrice = () => {
+    const basePrice = product.price * quantity;
+    const additionalsPrice = product.additionals.reduce((sum, additional) => {
+      const quantity = additionalQuantities[additional.id.toString()] || 0;
+      return sum + Number(additional.price) * quantity;
+    }, 0);
+    return basePrice + additionalsPrice;
+  };
+
   const handleAddOrUpdateProduct = () => {
-    const updatedProduct = { ...product, quantity };
+    const updatedAdditionals: Additional[] = product.additionals.map(
+      (additional) => ({
+        ...additional,
+        quantity: additionalQuantities[additional.id.toString()] || 0,
+      })
+    );
+
+    const updatedProduct = {
+      ...product,
+      quantity,
+      additionals: updatedAdditionals,
+    };
+
     if (existingProduct) {
       updateProductQuantity(product.p_id, quantity);
+      updateProductAdditionals(product.p_id, updatedAdditionals);
     } else {
       addProduct(product.company_id, updatedProduct);
     }
     onClose();
   };
+
   useEffect(() => {
-    // handle ESC
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
@@ -54,14 +96,15 @@ export default function AddProductModal({
     return () => {
       document.removeEventListener("keydown", handleEsc);
     };
-  }, []);
+  }, [onClose]);
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  getPlaceholderImageUrl;
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 transition-opacity duration-300">
       <div
@@ -93,7 +136,7 @@ export default function AddProductModal({
         <div className="flex justify-center items-center mb-4">
           <Image
             src={
-              // product.image ||
+              product.image ||
               getPlaceholderImageUrl({
                 width: 300,
                 height: 200,
@@ -129,11 +172,10 @@ export default function AddProductModal({
             </button>
           </div>
         </div>
-        {/* Additionals section (like sauces and cutlery and other optional stuff or preferences.) Format: checklist but the full item is tappable. Each additional has a category, that category is the title of the section */}
         <div className="mb-4">
           {product.additionals.map((additional) => (
             <div
-              key={additional.id}
+              key={additional.id.toString()}
               className="flex items-center justify-between py-2 px-4 mb-2 bg-gray-100 rounded-lg gap-3"
             >
               <span className="text-lg font-medium text-gray-700 flex justify-between items-center w-full">
@@ -157,16 +199,27 @@ export default function AddProductModal({
                 </span>
               </span>
               <div className="flex items-center">
-                <button className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                <button
+                  className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                  onClick={() => handleAdditionalChange(additional.id, -1)}
+                >
                   -
                 </button>
-                <span className="mx-4 text-xl font-semibold">0</span>
-                <button className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                <span className="mx-4 text-xl font-semibold">
+                  {additionalQuantities[additional.id.toString()] || 0}
+                </span>
+                <button
+                  className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                  onClick={() => handleAdditionalChange(additional.id, 1)}
+                >
                   +
                 </button>
               </div>
             </div>
           ))}
+        </div>
+        <div className="mb-4 text-lg font-medium text-gray-700">
+          Total Price: {calculateTotalPrice()} {product.currency}
         </div>
         <button
           className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 text-lg font-medium"
