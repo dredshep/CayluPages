@@ -21,10 +21,11 @@ export default function AddProductModal({
   const [quantity, setQuantity] = useState<number>(
     existingProduct ? existingProduct.quantity : 1
   );
+
   const [additionalQuantities, setAdditionalQuantities] = useState<{
     [key: string]: number;
   }>(
-    existingProduct
+    existingProduct?.additionals
       ? existingProduct.additionals.reduce((acc, additional) => {
           acc[additional.id.toString()] = additional.quantity || 0;
           return acc;
@@ -54,15 +55,18 @@ export default function AddProductModal({
 
   const calculateTotalPrice = () => {
     const basePrice = product.price * quantity;
-    const additionalsPrice = product.additionals.reduce((sum, additional) => {
-      const quantity = additionalQuantities[additional.id.toString()] || 0;
-      return sum + Number(additional.price) * quantity;
-    }, 0);
+    const additionalsPrice = (product.additionals || []).reduce(
+      (sum, additional) => {
+        const quantity = additionalQuantities[additional.id.toString()] || 0;
+        return sum + Number(additional.price) * quantity;
+      },
+      0
+    );
     return basePrice + additionalsPrice;
   };
 
   const handleAddOrUpdateProduct = () => {
-    const updatedAdditionals: Additional[] = product.additionals.map(
+    const updatedAdditionals: Additional[] = (product.additionals || []).map(
       (additional) => ({
         ...additional,
         quantity: additionalQuantities[additional.id.toString()] || 0,
@@ -173,50 +177,36 @@ export default function AddProductModal({
           </div>
         </div>
         <div className="mb-4">
-          {product.additionals.map((additional) => (
-            <div
-              key={additional.id.toString()}
-              className="flex items-center justify-between py-2 px-4 mb-2 bg-gray-100 rounded-lg gap-3"
-            >
-              <span className="text-lg font-medium text-gray-700 flex justify-between items-center w-full">
-                <span>{additional.name}</span>
-                <span>
-                  {additional.price.toString() +
-                    " " +
-                    (() => {
-                      const curr = additional.currency;
-                      switch (curr) {
-                        case "EUR":
-                          return "€";
-                        case "USD":
-                          return "$";
-                        case "COP":
-                          return "COL$";
-                        default:
-                          return curr;
-                      }
-                    })()}
+          {(product.additionals || [])
+            .filter((additional) => additional.currency === "EUR")
+            .map((additional) => (
+              <div
+                key={additional.id.toString()}
+                className="flex items-center justify-between py-2 px-4 mb-2 bg-gray-100 rounded-lg gap-3"
+              >
+                <span className="text-lg font-medium text-gray-700 flex justify-between items-center w-full">
+                  <span>{additional.name}</span>
+                  <span>{additional.price.toString() + " €"}</span>
                 </span>
-              </span>
-              <div className="flex items-center">
-                <button
-                  className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                  onClick={() => handleAdditionalChange(additional.id, -1)}
-                >
-                  -
-                </button>
-                <span className="mx-4 text-xl font-semibold">
-                  {additionalQuantities[additional.id.toString()] || 0}
-                </span>
-                <button
-                  className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                  onClick={() => handleAdditionalChange(additional.id, 1)}
-                >
-                  +
-                </button>
+                <div className="flex items-center">
+                  <button
+                    className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                    onClick={() => handleAdditionalChange(additional.id, -1)}
+                  >
+                    -
+                  </button>
+                  <span className="mx-4 text-xl font-semibold">
+                    {additionalQuantities[additional.id.toString()] || 0}
+                  </span>
+                  <button
+                    className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                    onClick={() => handleAdditionalChange(additional.id, 1)}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
         <div className="mb-4 text-lg font-medium text-gray-700">
           Total Price: {calculateTotalPrice()} {product.currency}

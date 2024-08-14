@@ -13,12 +13,12 @@ import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import AddProductModal from "@/components/sections/cart/AddProductModal";
 
 interface ProductType extends RawProductType {
-  additionals: additionals[];
-  category_products: category_products;
-  order_items: order_items[];
-  warehouses: warehouses;
-  companies: companies;
-  _count: {
+  additionals?: additionals[];
+  category_products?: category_products;
+  order_items?: order_items[];
+  warehouses?: warehouses;
+  companies?: companies;
+  _count?: {
     order_items: number;
   };
 }

@@ -9,7 +9,7 @@ export type CartProduct = {
   currency: string;
   quantity: number;
   name: string;
-  additionals: Additional[];
+  additionals?: Additional[];
   // opts: Record<string, any>; // Flexible options field
 };
 
