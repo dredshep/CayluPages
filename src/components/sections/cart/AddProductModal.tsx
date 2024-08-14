@@ -4,6 +4,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { CartProduct } from "@/types/CartProduct";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import Image from "next/image";
+import { additionals_currency } from "@prisma/client";
 
 interface AddProductModalProps {
   product: CartProduct;
@@ -127,6 +128,45 @@ export default function AddProductModal({
               +
             </button>
           </div>
+        </div>
+        {/* Additionals section (like sauces and cutlery and other optional stuff or preferences.) Format: checklist but the full item is tappable. Each additional has a category, that category is the title of the section */}
+        <div className="mb-4">
+          {product.additionals.map((additional) => (
+            <div
+              key={additional.id}
+              className="flex items-center justify-between py-2 px-4 mb-2 bg-gray-100 rounded-lg gap-3"
+            >
+              <span className="text-lg font-medium text-gray-700 flex justify-between items-center w-full">
+                <span>{additional.name}</span>
+                <span>
+                  {additional.price.toString() +
+                    " " +
+                    (() => {
+                      const curr = additional.currency;
+                      switch (curr) {
+                        case "EUR":
+                          return "€";
+                        case "USD":
+                          return "$";
+                        case "COP":
+                          return "COL$";
+                        default:
+                          return curr;
+                      }
+                    })()}
+                </span>
+              </span>
+              <div className="flex items-center">
+                <button className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                  -
+                </button>
+                <span className="mx-4 text-xl font-semibold">0</span>
+                <button className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                  +
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
         <button
           className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 text-lg font-medium"

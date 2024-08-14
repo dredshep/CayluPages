@@ -28,7 +28,7 @@ export default function RestaurantMenu() {
       const formattedHours = formatBusinessHours(hoursObject);
       setHours(formattedHours ?? "");
     }
-  }, [company]);
+  }, [company, hoursObject]);
 
   const banner = getPlaceholderImageUrl({
     width: 1685,

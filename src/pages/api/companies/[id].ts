@@ -26,7 +26,18 @@ export default async function handler(
         offers: true,
         order_purchases: true,
         orders: true,
-        products: true,
+        products: {
+          include: {
+            additionals: true,
+            category_products: true,
+            order_items: true,
+            warehouses: true,
+            companies: true,
+            _count: {
+              select: { order_items: true },
+            },
+          },
+        },
         states: true,
       },
     });

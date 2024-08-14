@@ -1,3 +1,5 @@
+import { additionals } from "@prisma/client";
+
 // Assuming you might want to include options and other properties in CartProduct
 export type CartProduct = {
   p_id: number;
@@ -7,5 +9,10 @@ export type CartProduct = {
   currency: string;
   quantity: number;
   name: string;
-  opts: Record<string, any>; // Flexible options field
+  additionals: Additional[];
+  // opts: Record<string, any>; // Flexible options field
 };
+
+export interface Additional extends additionals {
+  quantity?: number;
+}

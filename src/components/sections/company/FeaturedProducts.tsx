@@ -1,9 +1,27 @@
 // src/components/sections/company/FeaturedProducts.tsx
 import { FC, useState } from "react";
 import Image from "next/image";
-import { products as ProductType } from "@prisma/client";
+import {
+  additionals,
+  products as RawProductType,
+  category_products,
+  order_items,
+  warehouses,
+  companies,
+} from "@prisma/client";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import AddProductModal from "@/components/sections/cart/AddProductModal";
+
+interface ProductType extends RawProductType {
+  additionals: additionals[];
+  category_products: category_products;
+  order_items: order_items[];
+  warehouses: warehouses;
+  companies: companies;
+  _count: {
+    order_items: number;
+  };
+}
 
 interface FeaturedProductsProps {
   products: ProductType[];
@@ -77,7 +95,7 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({ products }) => {
             price: parseFloat(selectedProduct.price.toString()),
             quantity: 1, // Default quantity, AddProductModal will handle actual quantity updates
             currency: "EUR", // Assume currency, modify as needed
-            opts: {}, // Placeholder for additional options
+            additionals: selectedProduct.additionals,
           }}
           onClose={handleCloseModal}
         />
