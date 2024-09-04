@@ -1,6 +1,6 @@
-import { JoinedCompany } from "@/types/JoinedCompany";
+import { ApiCompany } from "@/pages/api/companies/[id]";
 
-type BusinessHour = JoinedCompany["business_hours"][0];
+type BusinessHour = ApiCompany["business_hours"][0] | null;
 
 export function formatBusinessHours(hours: BusinessHour | null): string | null {
   if (!hours) return null;
@@ -9,6 +9,7 @@ export function formatBusinessHours(hours: BusinessHour | null): string | null {
     minute: "2-digit",
     timeZone: "Europe/Madrid",
   };
+  if (!hours.open || !hours.close) return "No tiene horarios";
 
   const openTime = new Date(hours.open).toLocaleTimeString("es-ES", options);
   const closeTime = new Date(hours.close).toLocaleTimeString("es-ES", options);

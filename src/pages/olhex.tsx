@@ -140,7 +140,7 @@ const Dashboard: React.FC = () => {
 
     // Update the map view center if the base coordinates change
     mapRef.current?.getView().setCenter(fromLonLat([baseLng, baseLat]));
-  }, [triggerUpdate]);
+  }, [baseLat, baseLng, checkLat, checkLng, hexagons, triggerUpdate]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-6">

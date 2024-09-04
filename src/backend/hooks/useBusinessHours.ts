@@ -1,13 +1,13 @@
-import { JoinedCompany } from "@/types/JoinedCompany";
+import { ApiCompany } from "@/pages/api/companies/[id]";
 import { useState, useEffect } from "react";
 
 // The hook that fetches business hours based on the current day or a specific day
 function useBusinessHours(
-  company: JoinedCompany | null,
+  company: ApiCompany | null,
   day?: string
-): JoinedCompany["business_hours"][0] | null {
+): ApiCompany["business_hours"][0] | null {
   const [todayHours, setTodayHours] = useState<
-    JoinedCompany["business_hours"][0] | undefined
+    ApiCompany["business_hours"][0] | undefined
   >(undefined);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function useBusinessHours(
       // Find the business hours for the given day from the array
       const hours = company.business_hours.find(
         (hour) => hour.day === formattedDay
-      ) as JoinedCompany["business_hours"][0];
+      ) as ApiCompany["business_hours"][0];
       setTodayHours(hours);
     };
 

@@ -1,38 +1,24 @@
-// src/components/sections/company/FeaturedProducts.tsx
 import { FC, useState } from "react";
 import Image from "next/image";
-import {
-  additionals,
-  products as RawProductType,
-  category_products,
-  order_items,
-  warehouses,
-  companies,
-} from "@prisma/client";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import AddProductModal from "@/components/sections/cart/AddProductModal";
-
-interface ProductType extends RawProductType {
-  additionals?: additionals[];
-  category_products?: category_products;
-  order_items?: order_items[];
-  warehouses?: warehouses;
-  companies?: companies;
-  _count?: {
-    order_items: number;
-  };
-}
+import { ApiProduct } from "@/pages/api/companies/[id]";
+import { additionals, catalogue_sorts } from "@prisma/client";
 
 interface FeaturedProductsProps {
-  products: ProductType[];
+  products: ApiProduct[];
+  categoryProducts: { [key: string]: string }; // Map categoryproduct_id to category name
 }
 
-const FeaturedProducts: FC<FeaturedProductsProps> = ({ products }) => {
-  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
+const FeaturedProducts: FC<FeaturedProductsProps> = ({
+  products,
+  categoryProducts,
+}) => {
+  const [selectedProduct, setSelectedProduct] = useState<ApiProduct | null>(
     null
   );
 
-  const handleOpenModal = (product: ProductType) => {
+  const handleOpenModal = (product: ApiProduct) => {
     setSelectedProduct(product);
   };
 
@@ -62,15 +48,12 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({ products }) => {
           </div>
           <div className="w-[300px] h-[163px] rounded-r-[7px] overflow-hidden">
             <Image
-              src={
-                // product.image ||
-                getPlaceholderImageUrl({
-                  width: 300,
-                  height: 163,
-                  bgColor: "gray",
-                  textColor: "black",
-                })
-              }
+              src={getPlaceholderImageUrl({
+                width: 300,
+                height: 163,
+                bgColor: "gray",
+                textColor: "black",
+              })}
               width={300}
               height={163}
               alt={product.name}
@@ -83,7 +66,6 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({ products }) => {
         <AddProductModal
           product={{
             p_id: Number(selectedProduct.id),
-            // image: selectedProduct.image ?? undefined,
             image: getPlaceholderImageUrl({
               width: 300,
               height: 200,
@@ -93,9 +75,14 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({ products }) => {
             company_id: Number(selectedProduct.company_id),
             name: selectedProduct.name,
             price: parseFloat(selectedProduct.price.toString()),
-            quantity: 1, // Default quantity, AddProductModal will handle actual quantity updates
-            currency: "EUR", // Assume currency, modify as needed
-            additionals: selectedProduct.additionals,
+            quantity: 1,
+            currency: "EUR",
+            additionals: selectedProduct.additionals.map((apiAdditional) => ({
+              ...apiAdditional,
+              category_name: apiAdditional.category_products.name,
+              category_id: Number(apiAdditional.category_products.id),
+              sort: apiAdditional.catalogue_sorts?.sort,
+            })),
           }}
           onClose={handleCloseModal}
         />

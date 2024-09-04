@@ -25,6 +25,7 @@ model additionals {
   category_products  category_products    @relation(fields: [categoryproduct_id], references: [id], onUpdate: Restrict, map: "additionals_categoryproduct_id_foreign")
   companies          companies            @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "additionals_company_id_foreign")
   products           products             @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "additionals_product_id_foreign")
+  catalogue_sorts    catalogue_sorts[]
   order_items        order_items[]
 
   @@index([company_id], map: "additionals_company_id_foreign")
@@ -36,13 +37,14 @@ model additionals {
 model business_hours {
   id             BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
   company_id     BigInt                @db.UnsignedBigInt
-  day            business_hours_day
-  open           DateTime              @db.Time(0)
-  close          DateTime              @db.Time(0)
-  cooking_period String                @db.LongText
+  day            business_hours_day?
+  open           DateTime?             @db.Time(0)
+  close          DateTime?             @db.Time(0)
+  cooking_period DateTime?             @db.Time(0)
   status         business_hours_status @default(Active)
   created_at     DateTime?             @db.Timestamp(0)
   updated_at     DateTime?             @db.Timestamp(0)
+  deleted_at     DateTime?             @db.Timestamp(0)
   companies      companies             @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "business_hours_company_id_foreign")
 
   @@index([company_id], map: "business_hours_company_id_foreign")
@@ -62,17 +64,18 @@ model cache_locks {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model category_products {
-  id          BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
-  company_id  BigInt                   @db.UnsignedBigInt
-  name        String                   @db.VarChar(255)
-  description String                   @db.Text
-  status      category_products_status @default(Active)
-  created_at  DateTime?                @db.Timestamp(0)
-  updated_at  DateTime?                @db.Timestamp(0)
-  deleted_at  DateTime?                @db.Timestamp(0)
-  additionals additionals[]
-  companies   companies                @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "category_products_company_id_foreign")
-  products    products[]
+  id              BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id      BigInt                   @db.UnsignedBigInt
+  name            String                   @db.VarChar(255)
+  description     String                   @db.Text
+  status          category_products_status @default(Active)
+  created_at      DateTime?                @db.Timestamp(0)
+  updated_at      DateTime?                @db.Timestamp(0)
+  deleted_at      DateTime?                @db.Timestamp(0)
+  additionals     additionals[]
+  catalogue_sorts catalogue_sorts[]
+  companies       companies                @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "category_products_company_id_foreign")
+  products        products[]
 
   @@index([company_id], map: "category_products_company_id_foreign")
 }
@@ -318,30 +321,31 @@ model payment_methods {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model products {
-  id                  BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
-  company_id          BigInt            @db.UnsignedBigInt
-  category_product_id BigInt            @db.UnsignedBigInt
-  warehouse_id        BigInt            @db.UnsignedBigInt
-  sku                 String            @db.VarChar(255)
-  name                String            @db.VarChar(255)
-  product_image       String?           @db.VarChar(255)
-  description         String            @db.Text
-  amount              Int
-  price               Decimal           @db.Decimal(10, 2)
-  currency            products_currency @default(USD)
-  status              products_status   @default(Available)
-  created_at          DateTime?         @db.Timestamp(0)
-  updated_at          DateTime?         @db.Timestamp(0)
-  deleted_at          DateTime?         @db.Timestamp(0)
-  additionals         additionals[]
-  order_items         order_items[]
-  category_products   category_products @relation(fields: [category_product_id], references: [id], onUpdate: Restrict, map: "products_category_product_id_foreign")
-  companies           companies         @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "products_company_id_foreign")
-  warehouses          warehouses        @relation(fields: [warehouse_id], references: [id], onUpdate: Restrict, map: "products_warehouse_id_foreign")
+  id                 BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id         BigInt            @db.UnsignedBigInt
+  categoryproduct_id BigInt            @db.UnsignedBigInt
+  warehouse_id       BigInt            @db.UnsignedBigInt
+  sku                String            @db.VarChar(255)
+  name               String            @db.VarChar(255)
+  product_image      String?           @db.VarChar(255)
+  description        String            @db.Text
+  amount             Int
+  price              Decimal           @db.Decimal(10, 2)
+  currency           products_currency @default(USD)
+  status             products_status   @default(Available)
+  created_at         DateTime?         @db.Timestamp(0)
+  updated_at         DateTime?         @db.Timestamp(0)
+  deleted_at         DateTime?         @db.Timestamp(0)
+  additionals        additionals[]
+  catalogue_sorts    catalogue_sorts[]
+  order_items        order_items[]
+  category_products  category_products @relation(fields: [categoryproduct_id], references: [id], onUpdate: Restrict, map: "products_categoryproduct_id_foreign")
+  companies          companies         @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "products_company_id_foreign")
+  warehouses         warehouses        @relation(fields: [warehouse_id], references: [id], onUpdate: Restrict, map: "products_warehouse_id_foreign")
 
-  @@index([category_product_id], map: "products_category_product_id_foreign")
   @@index([company_id], map: "products_company_id_foreign")
   @@index([warehouse_id], map: "products_warehouse_id_foreign")
+  @@index([categoryproduct_id], map: "products_categoryproduct_id_foreign")
 }
 
 model sessions {
@@ -484,6 +488,25 @@ model warehouses {
   companies      companies                 @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "warehouses_company_id_foreign")
 
   @@index([company_id], map: "warehouses_company_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model catalogue_sorts {
+  id                 BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  additional_id      BigInt            @db.UnsignedBigInt
+  product_id         BigInt            @db.UnsignedBigInt
+  categoryproduct_id BigInt            @db.UnsignedBigInt
+  sort               Int?
+  created_at         DateTime?         @db.Timestamp(0)
+  updated_at         DateTime?         @db.Timestamp(0)
+  deleted_at         DateTime?         @db.Timestamp(0)
+  additionals        additionals       @relation(fields: [additional_id], references: [id], onUpdate: Restrict, map: "catalogue_sorts_additional_id_foreign")
+  category_products  category_products @relation(fields: [categoryproduct_id], references: [id], onUpdate: Restrict, map: "catalogue_sorts_categoryproduct_id_foreign")
+  products           products          @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "catalogue_sorts_product_id_foreign")
+
+  @@index([additional_id], map: "catalogue_sorts_additional_id_foreign")
+  @@index([categoryproduct_id], map: "catalogue_sorts_categoryproduct_id_foreign")
+  @@index([product_id], map: "catalogue_sorts_product_id_foreign")
 }
 
 enum payment_methods_name {

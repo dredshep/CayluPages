@@ -43,7 +43,7 @@ export default function AddProductModal({
     setQuantity((prev) => Math.max(1, prev + change));
   };
 
-  const handleAdditionalChange = (additionalId: bigint, change: number) => {
+  const handleAdditionalChange = (additionalId: number, change: number) => {
     setAdditionalQuantities((prev) => ({
       ...prev,
       [additionalId.toString()]: Math.max(
@@ -107,7 +107,28 @@ export default function AddProductModal({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    // eslint-disable-next-line
   }, []);
+
+  // Group the additionals by category and sort them by catalogue_sorts.sort
+  const groupedAdditionals = product.additionals?.reduce((acc, additional) => {
+    const categoryName = additional.category_products.name || "Other";
+    if (!acc[categoryName]) {
+      acc[categoryName] = [];
+    }
+    acc[categoryName].push(additional);
+    return acc;
+  }, {} as { [key: string]: Additional[] });
+
+  // Sort the additionals in each category by the sort number
+  if (groupedAdditionals) {
+    Object.keys(groupedAdditionals).forEach((categoryName) => {
+      groupedAdditionals[categoryName].sort(
+        (a, b) =>
+          (a.catalogue_sorts[0]?.sort || 0) - (b.catalogue_sorts[0]?.sort || 0)
+      );
+    });
+  }
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 transition-opacity duration-300">
@@ -125,13 +146,13 @@ export default function AddProductModal({
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
-              stroke-width="1.5"
+              strokeWidth="1.5"
               stroke="currentColor"
               className="w-6 h-6"
             >
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 d="M6 18L18 6M6 6l12 12"
               />
             </svg>
@@ -177,36 +198,50 @@ export default function AddProductModal({
           </div>
         </div>
         <div className="mb-4">
-          {(product.additionals || [])
-            .filter((additional) => additional.currency === "EUR")
-            .map((additional) => (
-              <div
-                key={additional.id.toString()}
-                className="flex items-center justify-between py-2 px-4 mb-2 bg-gray-100 rounded-lg gap-3"
-              >
-                <span className="text-lg font-medium text-gray-700 flex justify-between items-center w-full">
-                  <span>{additional.name}</span>
-                  <span>{additional.price.toString() + " €"}</span>
-                </span>
-                <div className="flex items-center">
-                  <button
-                    className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                    onClick={() => handleAdditionalChange(additional.id, -1)}
-                  >
-                    -
-                  </button>
-                  <span className="mx-4 text-xl font-semibold">
-                    {additionalQuantities[additional.id.toString()] || 0}
-                  </span>
-                  <button
-                    className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                    onClick={() => handleAdditionalChange(additional.id, 1)}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ))}
+          {groupedAdditionals
+            ? Object.entries(groupedAdditionals).map(
+                ([categoryName, additionals], i) => (
+                  <div key={categoryName}>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                      {categoryName}
+                    </h3>
+                    {additionals.map((additional) => (
+                      <div
+                        key={additional.id.toString()}
+                        className="flex items-center justify-between py-2 px-4 mb-2 bg-gray-100 rounded-lg gap-3"
+                      >
+                        <span className="text-lg font-medium text-gray-700 flex justify-between items-center w-full">
+                          <span>{additional.name} </span>
+                          <span>{additional.price.toString() + " €"}</span>
+                        </span>
+                        <div className="flex items-center">
+                          <button
+                            className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                            onClick={() =>
+                              handleAdditionalChange(additional.id, -1)
+                            }
+                          >
+                            -
+                          </button>
+                          <span className="mx-4 text-xl font-semibold">
+                            {additionalQuantities[additional.id.toString()] ||
+                              0}
+                          </span>
+                          <button
+                            className="text-lg font-bold text-gray-600 hover:text-gray-800 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                            onClick={() =>
+                              handleAdditionalChange(additional.id, 1)
+                            }
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )
+            : null}
         </div>
         <div className="mb-4 text-lg font-medium text-gray-700">
           Total Price: {calculateTotalPrice()} {product.currency}

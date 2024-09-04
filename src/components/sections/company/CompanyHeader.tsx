@@ -1,8 +1,10 @@
 import { FC } from "react";
 import { JoinedCompany } from "@/types/JoinedCompany";
+import { ApiCompany } from "@/pages/api/companies/[id]";
 
 interface CompanyHeaderProps {
-  company: JoinedCompany;
+  // company: JoinedCompany;
+  company: ApiCompany;
   hours: string;
 }
 
