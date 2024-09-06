@@ -46,16 +46,16 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({
               Add to Cart
             </button>
           </div>
-          <div className="w-[300px] h-[163px] rounded-r-[7px] overflow-hidden">
+          <div className="w-[300px] h-[200px] rounded-r-[7px] overflow-hidden">
             <Image
               src={getPlaceholderImageUrl({
                 width: 300,
-                height: 163,
+                height: 200,
                 bgColor: "gray",
                 textColor: "black",
               })}
               width={300}
-              height={163}
+              height={200}
               alt={product.name}
               className="object-cover object-center h-full"
             />

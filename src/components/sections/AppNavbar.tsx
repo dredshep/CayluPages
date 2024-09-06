@@ -17,8 +17,12 @@ export default function AppNavbar() {
     useState<number>(0);
 
   useEffect(() => {
+    console.log({
+      serverSide: cartProductCount,
+      browserSide: browserSideCartProductCount,
+    });
     setBrowserSideCartProductCount(cartProductCount ?? 0);
-  }, [cartProductCount]);
+  }, [cartProductCount, browserSideCartProductCount]);
   const handleCartClick = () => {
     setPopoverVisible((prev) => !prev);
   };
