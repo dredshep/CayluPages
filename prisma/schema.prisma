@@ -509,6 +509,26 @@ model catalogue_sorts {
   @@index([product_id], map: "catalogue_sorts_product_id_foreign")
 }
 
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model additionals_backup {
+  id                 BigInt                      @default(0) @db.UnsignedBigInt
+  company_id         BigInt                      @db.UnsignedBigInt
+  product_id         BigInt                      @db.UnsignedBigInt
+  categoryproduct_id BigInt                      @db.UnsignedBigInt
+  name               String                      @db.VarChar(255)
+  sku                String                      @db.VarChar(255)
+  amount             Int
+  price              Decimal                     @db.Decimal(10, 2)
+  currency           additionals_backup_currency @default(USD)
+  status             additionals_backup_status   @default(Available)
+  created_at         DateTime?                   @db.Timestamp(0)
+  updated_at         DateTime?                   @db.Timestamp(0)
+  deleted_at         DateTime?                   @db.Timestamp(0)
+
+  @@ignore
+}
+
 enum payment_methods_name {
   Stripe
   Paypal
@@ -667,4 +687,16 @@ enum products_currency {
   USD
   EUR
   COP
+}
+
+enum additionals_backup_currency {
+  USD
+  EUR
+  COP
+}
+
+enum additionals_backup_status {
+  Available
+  Exhausted
+  Inactive
 }
