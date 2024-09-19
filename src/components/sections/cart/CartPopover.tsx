@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useCartStore2 } from "@/store/useCartStore2";
 import { CartProduct } from "@/types/CartProduct";
 import AddProductModal from "@/components/sections/cart/AddProductModal";
+import { createOrder } from "@/services/orderService";
 
 export default function CartPopover({ onClose }: { onClose: () => void }) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -17,7 +18,21 @@ export default function CartPopover({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const handleCheckout = () => {
+  // const handleCheckout = () => {
+  //   if (!cart || !cart.products || cart.products.length === 0) {
+  //     alert("El carrito está vacío");
+  //     return;
+  //   }
+
+  //   const checkoutData = {
+  //     company_id: cart.company_id,
+  //     products: cart.products,
+  //     total: calculateTotal(),
+  //   };
+  //   alert(JSON.stringify(checkoutData, null, 2));
+  // };
+
+  const handleCheckout = async () => {
     if (!cart || !cart.products || cart.products.length === 0) {
       alert("El carrito está vacío");
       return;
@@ -26,9 +41,16 @@ export default function CartPopover({ onClose }: { onClose: () => void }) {
     const checkoutData = {
       company_id: cart.company_id,
       products: cart.products,
-      total: calculateTotal(),
     };
-    alert(JSON.stringify(checkoutData, null, 2));
+
+    const result = await createOrder(checkoutData);
+
+    if (result.success) {
+      alert(`Order created successfully with ID: ${result.orderId}`);
+      // Redirect to payment or order confirmation page
+    } else {
+      alert(`Error creating order: ${result.error}`);
+    }
   };
 
   const calculateProductTotal = (product: CartProduct): number => {
