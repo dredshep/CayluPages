@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { CartProduct, Additional } from "@/types"; // Assuming you've defined these types elsewhere
-
+import { CartProduct } from "@/types";
+import { ApiAdditional } from "@/pages/api/companies/[id]";
+type Additional = ApiAdditional;
 type Cart = {
   company_id: number;
   products: CartProduct[] | undefined;

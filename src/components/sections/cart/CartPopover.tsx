@@ -18,20 +18,6 @@ export default function CartPopover({ onClose }: { onClose: () => void }) {
     }
   };
 
-  // const handleCheckout = () => {
-  //   if (!cart || !cart.products || cart.products.length === 0) {
-  //     alert("El carrito está vacío");
-  //     return;
-  //   }
-
-  //   const checkoutData = {
-  //     company_id: cart.company_id,
-  //     products: cart.products,
-  //     total: calculateTotal(),
-  //   };
-  //   alert(JSON.stringify(checkoutData, null, 2));
-  // };
-
   const handleCheckout = async () => {
     if (!cart || !cart.products || cart.products.length === 0) {
       alert("El carrito está vacío");
@@ -47,6 +33,7 @@ export default function CartPopover({ onClose }: { onClose: () => void }) {
 
     if (result.success) {
       alert(`Order created successfully with ID: ${result.orderId}`);
+      useCartStore2.getState().clearCart();
       // Redirect to payment or order confirmation page
     } else {
       alert(`Error creating order: ${result.error}`);

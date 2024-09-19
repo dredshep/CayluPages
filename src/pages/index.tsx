@@ -8,8 +8,12 @@ import TrabajaconNosotrosCTA from "@components/sections/TrabajaConNosotrosCTA";
 import ReviewCard from "@components/cards/ReviewCard";
 import reviews from "@/dummyData/reviews";
 import Image from "next/image";
+import LoginModal from "@/components/sections/LoginForm";
+import { useState } from "react";
 
 function Navbar() {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
   return (
     <nav>
       <div className="flex justify-between h-32 items-center px-10">
@@ -25,14 +29,18 @@ function Navbar() {
           >
             Regístrate
           </Link>
-          <Link
-            href="/contact"
+          <div
+            onClick={() => setIsLoginModalOpen(true)}
+            // href="/contact"
             className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px]"
           >
             Iniciar sesión
-          </Link>
+          </div>
         </div>
       </div>
+      {isLoginModalOpen && (
+        <LoginModal onClose={() => setIsLoginModalOpen(false)} />
+      )}
     </nav>
   );
 }

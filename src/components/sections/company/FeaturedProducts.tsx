@@ -33,7 +33,15 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({
           key={product.id.toString()}
           className="flex gap-5 flex-1 justify-between rounded-[10px] border-2 border-zinc-500"
         >
-          <div className="flex flex-col max-w-[300px] justify-center px-[25px]">
+          <div className="flex flex-col max-w-[300px] justify-center px-[25px] relative">
+            {/* temporary additionals count. small box! absolute positioned top left. */}
+            <div
+              className={`absolute top-0 left-0 rounded-lg text-gray-800 p-1 ${
+                product.additionals.length > 0 ? "bg-orange-400" : "bg-gray-200"
+              }`}
+            >
+              {product.additionals.length} additionals
+            </div>
             <h2 className="text-lg font-semibold">{product.name}</h2>
             <div className="flex gap-2 items-center">
               <p className="text-base">{product.price.toString()}€</p>

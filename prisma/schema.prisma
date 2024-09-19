@@ -36,17 +36,15 @@ model additionals {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model business_hours {
-  id             BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
-  company_id     BigInt                @db.UnsignedBigInt
-  day            business_hours_day?
-  open           DateTime?             @db.Time(0)
-  close          DateTime?             @db.Time(0)
-  cooking_period DateTime?             @db.Time(0)
-  status         business_hours_status @default(Active)
-  created_at     DateTime?             @db.Timestamp(0)
-  updated_at     DateTime?             @db.Timestamp(0)
-  deleted_at     DateTime?             @db.Timestamp(0)
-  companies      companies             @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "business_hours_company_id_foreign")
+  id         BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id BigInt                @db.UnsignedBigInt
+  day        business_hours_day?
+  status     business_hours_status @default(Active)
+  created_at DateTime?             @db.Timestamp(0)
+  updated_at DateTime?             @db.Timestamp(0)
+  deleted_at DateTime?             @db.Timestamp(0)
+  companies  companies             @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "business_hours_company_id_foreign")
+  shifts     shifts[]
 
   @@index([company_id], map: "business_hours_company_id_foreign")
 }
@@ -571,6 +569,21 @@ model order_item_additionals {
 
   @@index([additional_id], map: "additional_id")
   @@index([order_item_id], map: "order_item_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model shifts {
+  id               BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
+  business_hour_id BigInt         @db.UnsignedBigInt
+  name             String         @db.VarChar(255)
+  open             DateTime?      @db.Time(0)
+  close            DateTime?      @db.Time(0)
+  cooking_period   DateTime?      @db.Time(0)
+  created_at       DateTime?      @db.Timestamp(0)
+  updated_at       DateTime?      @db.Timestamp(0)
+  business_hours   business_hours @relation(fields: [business_hour_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "shifts_business_hour_id_foreign")
+
+  @@index([business_hour_id], map: "shifts_business_hour_id_foreign")
 }
 
 enum payment_methods_name {

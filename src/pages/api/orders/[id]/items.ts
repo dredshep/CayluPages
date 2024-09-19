@@ -31,6 +31,9 @@ export default async function handler(
         // Add additionals if they exist
         if (additionals && additionals.length > 0) {
           for (const additional of additionals) {
+            if (additional.quantity === 0) {
+              continue;
+            }
             await prisma.order_item_additionals.create({
               data: {
                 order_item_id: orderItem.id,
