@@ -47,7 +47,7 @@ export default function RestaurantMenu({
       <hr className="w-full h-0.5 bg-neutral-400 mt-[35px]" />
       <div className="mt-[55px] flex gap-[198px]">
         <ProductCategories categories={company.category_products || []} />
-        <FeaturedProducts products={company.products || []} />
+        <FeaturedProducts products={company.products || []} categoryProducts={{}} />
       </div>
     </div>
   );
