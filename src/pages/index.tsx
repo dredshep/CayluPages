@@ -8,7 +8,7 @@ import TrabajaconNosotrosCTA from "@components/sections/TrabajaConNosotrosCTA";
 import ReviewCard from "@components/cards/ReviewCard";
 import reviews from "@/dummyData/reviews";
 import Image from "next/image";
-import LoginModal from "@/components/sections/LoginForm";
+import LoginModal from "@/components/sections/LoginForm/LoginModal";
 import { useState } from "react";
 
 function Navbar() {
