@@ -9,6 +9,7 @@ import { handleLogin, handleRegister, handleRecovery } from "./authUtils";
 
 interface LoginModalProps {
   onClose: () => void;
+  initialActiveTab?: "login" | "register" | "recovery";
 }
 
 interface FormData {
@@ -18,10 +19,9 @@ interface FormData {
   rememberMe: boolean;
 }
 
-export default function LoginModal({ onClose }: LoginModalProps) {
-  const [activeTab, setActiveTab] = useState<"login" | "register" | "recovery">(
-    "login"
-  );
+export default function LoginModal({ onClose, initialActiveTab = "login" }: LoginModalProps) {
+  const [activeTab, setActiveTab] = useState<"login" | "register" | "recovery">(initialActiveTab);
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -61,8 +61,8 @@ export default function LoginModal({ onClose }: LoginModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">
-            {activeTab === "login" ? "Login" : "Register"}
+        <h2 className="text-2xl font-bold">
+            {activeTab === "login" ? "Login" : activeTab === "register" ? "Register" : "Password Recovery"}
           </h2>
           <button
             className="text-gray-500 hover:text-gray-800"

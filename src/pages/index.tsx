@@ -13,6 +13,12 @@ import { useState } from "react";
 
 function Navbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"login" | "register" | "recovery">("login");
+
+  const openLoginModal = (tab: "login" | "register") => {
+    setActiveTab(tab);
+    setIsLoginModalOpen(true);
+  };
 
   return (
     <nav>
@@ -23,23 +29,26 @@ function Navbar() {
           <HamburgerIcon className="" />
         </div>
         <div className="flex gap-4">
-          <Link
-            href="/about"
-            className="text-xl font-semibold bg-white rounded-full px-[26px] py-[13px]"
+          <div
+            onClick={() => openLoginModal("register")}
+            className="text-xl font-semibold bg-white rounded-full px-[26px] py-[13px] select-none hover:brightness-90 transition-all duration-100 cursor-pointer"
           >
             Regístrate
-          </Link>
+          </div>
           <div
-            onClick={() => setIsLoginModalOpen(true)}
+            onClick={() => openLoginModal("login")}
             // href="/contact"
-            className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px]"
+            className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px] select-none cursor-pointer hover:brightness-110 transition-all duration-100"
           >
             Iniciar sesión
           </div>
         </div>
       </div>
       {isLoginModalOpen && (
-        <LoginModal onClose={() => setIsLoginModalOpen(false)} />
+        <LoginModal 
+          onClose={() => setIsLoginModalOpen(false)} 
+          initialActiveTab={activeTab}
+        />
       )}
     </nav>
   );

@@ -73,7 +73,7 @@ export default function AppNavbar() {
       </Link>
       <Link
         href="/signin"
-        className="text-black bg-teal-400 rounded-full px-[26px] py-[13px]"
+        className="text-black bg-teal-400 rounded-full px-[26px] py-[13px] select-none hover:opacity-70 transition-all duration-100 cursor-pointer"
       >
         Iniciar sesión
       </Link>
