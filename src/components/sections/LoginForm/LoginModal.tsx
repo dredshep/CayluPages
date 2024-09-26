@@ -64,7 +64,7 @@ export default function LoginModal({
         if (data.password !== data.confirmPassword) {
           throw new Error("Passwords do not match.");
         }
-        await register(emailLowerCase, data.password);
+        await register(emailLowerCase, data.password, data.name);
         setSuccessMessage(
           "Registration successful. Please check your email to verify your account."
         );

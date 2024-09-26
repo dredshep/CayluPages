@@ -20,11 +20,11 @@ const useAuth = () => {
     }
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (email: string, password: string, name: string) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await registerUser(email, password);
+      const data = await registerUser(email, password, name);
       setLoading(false);
       return data;
     } catch (err: any) {

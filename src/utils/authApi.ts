@@ -27,9 +27,17 @@ export const loginUser = async (email: string, password: string) => {
   }
 };
 
-export const registerUser = async (email: string, password: string) => {
+export const registerUser = async (
+  email: string,
+  password: string,
+  name: string
+) => {
   try {
-    const response = await api.post("/auth/register", { email, password });
+    const response = await api.post("/auth/register", {
+      email,
+      password,
+      name,
+    });
     return response.data;
   } catch (error: any) {
     throw new Error(error.response.data.message);
