@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import bcrypt from "bcryptjs";
 import { createPortal } from "react-dom";
 
 interface LoginModalProps {
@@ -29,28 +28,21 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
   const onSubmit = async (data: FormData) => {
     const emailLowerCase = data.email.toLowerCase();
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(
-      emailLowerCase + data.password,
-      salt
-    );
 
     if (activeTab === "register") {
       if (data.password !== data.confirmPassword) {
         setLoginError("Passwords do not match.");
         return;
       }
-      // Proceed with the registration logic (e.g., send to server)
       console.log("Register with:", {
         email: data.email,
-        password: hashedPassword,
+        password: data.password,
         rememberMe: data.rememberMe,
       });
     } else {
-      // Proceed with the login logic (e.g., authenticate)
       console.log("Login with:", {
         email: data.email,
-        password: hashedPassword,
+        password: data.password,
         rememberMe: data.rememberMe,
       });
     }

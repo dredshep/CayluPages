@@ -9,11 +9,17 @@ import ReviewCard from "@components/cards/ReviewCard";
 import reviews from "@/dummyData/reviews";
 import Image from "next/image";
 import LoginModal from "@/components/sections/LoginForm/LoginModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function Navbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "register" | "recovery">("login");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = document.cookie.split('; ').find(row => row.startsWith('auth_token='));
+    setIsLoggedIn(!!token);
+  }, []);
 
   const openLoginModal = (tab: "login" | "register") => {
     setActiveTab(tab);
@@ -24,24 +30,31 @@ function Navbar() {
     <nav>
       <div className="flex justify-between h-32 items-center px-10">
         <div>
-          {/* hamburger */}
-          {/* <FaBars className="text-white h-8 w-8" /> */}
           <HamburgerIcon className="" />
         </div>
         <div className="flex gap-4">
-          <div
-            onClick={() => openLoginModal("register")}
-            className="text-xl font-semibold bg-white rounded-full px-[26px] py-[13px] select-none hover:brightness-90 transition-all duration-100 cursor-pointer"
-          >
-            Regístrate
-          </div>
-          <div
-            onClick={() => openLoginModal("login")}
-            // href="/contact"
-            className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px] select-none cursor-pointer hover:brightness-110 transition-all duration-100"
-          >
-            Iniciar sesión
-          </div>
+          {isLoggedIn ? (
+            <div
+              className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px] select-none cursor-pointer hover:brightness-110 transition-all duration-100"
+            >
+              Mi Cuenta
+            </div>
+          ) : (
+            <>
+              <div
+                onClick={() => openLoginModal("register")}
+                className="text-xl font-semibold bg-white rounded-full px-[26px] py-[13px] select-none hover:brightness-90 transition-all duration-100 cursor-pointer"
+              >
+                Regístrate
+              </div>
+              <div
+                onClick={() => openLoginModal("login")}
+                className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px] select-none cursor-pointer hover:brightness-110 transition-all duration-100"
+              >
+                Iniciar sesión
+              </div>
+            </>
+          )}
         </div>
       </div>
       {isLoginModalOpen && (

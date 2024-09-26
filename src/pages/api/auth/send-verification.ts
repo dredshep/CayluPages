@@ -43,19 +43,19 @@ export default async function handler(
       });
 
       // Create the verification URL
-      const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}&email=${email}`;
+      const verificationUrl = `/api/verify-email?token=${token}&email=${email}`;
 
       // Send the email
       const transporter = nodemailer.createTransport({
         service: "Gmail", // Use your email provider here
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
         },
       });
 
       const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: process.env.SMTP_USER,
         to: email,
         subject: "Email Verification",
         html: `<p>Please verify your email by clicking the link below:</p>
