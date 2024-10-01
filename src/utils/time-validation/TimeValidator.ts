@@ -10,6 +10,13 @@ interface Holiday {
   holiday_date: string; // "DD-MM"
 }
 
+interface ProductHour {
+  weekday: number;
+  start_time: string;
+  end_time: string;
+  productshift_id: number;
+}
+
 class TimeValidator {
   private businessHours: BusinessHour[];
   private holidays: Holiday[];
@@ -67,6 +74,34 @@ class TimeValidator {
 
     // Otherwise, validate the time against the business hours
     return this.validateBusinessHours(targetTime, businessHour);
+  }
+
+  // Validate if a given time is within the product hours for a specific weekday
+  validateProductHours(targetTime: Moment, productHour: ProductHour): boolean {
+    // Similar to validateBusinessHours, but for products
+    const weekday = targetTime.day();
+    if (productHour.weekday !== weekday) return false;
+
+    const productStart = moment(
+      targetTime.format("YYYY-MM-DD") + " " + productHour.start_time,
+      "YYYY-MM-DD HH:mm"
+    );
+    const productEnd = moment(
+      targetTime.format("YYYY-MM-DD") + " " + productHour.end_time,
+      "YYYY-MM-DD HH:mm"
+    );
+
+    return targetTime.isBetween(productStart, productEnd, undefined, "[]");
+  }
+
+  // Check if a product is available at a specific time
+  isProductAvailableAtTime(
+    productHour: ProductHour,
+    targetTime: Moment
+  ): boolean {
+    const isHoliday = this.validateHoliday(targetTime);
+    if (isHoliday) return false;
+    return this.validateProductHours(targetTime, productHour);
   }
 }
 

@@ -8,19 +8,35 @@ import ProductCategories from "@/components/sections/company/ProductCategories";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import { formatBusinessHours } from "@/backend/utils/formatBusinessHours";
 import { GetServerSideProps } from "next";
-import { ApiCompany } from "../api/companies/[id]";
+import { ApiCompany, ApiProduct } from "../api/companies/[id]";
+import { useEffect } from "react";
+import { useCompanyStore } from "@/store/company/useCompanyStore";
+import { useProductStore } from "@/store/product/useProductStore";
 
 type RestaurantMenuProps = {
-  company: ApiCompany | null;
-  hours: string;
+  companyId: number;
 };
 
-export default function RestaurantMenu({
-  company,
-  hours,
-}: RestaurantMenuProps) {
+export default function RestaurantMenu({ companyId }: RestaurantMenuProps) {
+  const { fetchCompany } = useCompanyStore();
+  const { fetchProducts, products, checkAvailability } = useProductStore();
+
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchCompany(companyId);
+      await fetchProducts(companyId);
+      await checkAvailability(companyId);
+    };
+    loadData();
+  }, [companyId]);
+
+  const company = useCompanyStore((state) =>
+    state.companies.find((c) => c.id === companyId)
+  );
+  const companyProducts = products[companyId] || [];
+
   if (!company) {
-    return <div>Company not found</div>;
+    return <div>Loading...</div>;
   }
 
   const banner = getPlaceholderImageUrl({
@@ -29,6 +45,8 @@ export default function RestaurantMenu({
     bgColor: "skyblue",
     textColor: "white",
   });
+
+  const hours = formatBusinessHours(company.business_hours[0]);
 
   return (
     <div className="bg-white min-h-screen max-w-[1685px] mx-auto pb-[194px]">
@@ -42,12 +60,12 @@ export default function RestaurantMenu({
         height={368}
         alt="Restaurant menu cover image"
       />
-      <CompanyHeader company={company} hours={hours} />
+      <CompanyHeader company={company} hours={hours || ""} />
       <CartSummary />
       <hr className="w-full h-0.5 bg-neutral-400 mt-[35px]" />
       <div className="mt-[55px] flex gap-[198px]">
-        <ProductCategories categories={company.category_products || []} />
-        <FeaturedProducts products={company.products || []} categoryProducts={{}} />
+        <ProductCategories categories={company.category_products} />
+        <FeaturedProducts products={companyProducts} categoryProducts={{}} />
       </div>
     </div>
   );
@@ -55,42 +73,16 @@ export default function RestaurantMenu({
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.query;
-  const { req } = context;
 
-  if (!id) {
+  if (!id || typeof id !== "string") {
     return {
       notFound: true,
     };
   }
 
-  try {
-    // Get the host (e.g., localhost:3000, caylu-deployment-commit12451243.vercel.app)
-    const host = req.headers.host;
-    const protocol = req.headers["x-forwarded-proto"] || "http";
-    const baseUrl = `${protocol}://${host}`;
-
-    // Use the base URL to construct the full API endpoint
-    const res = await fetch(`${baseUrl}/api/companies/${id}`);
-
-    if (!res.ok) {
-      return {
-        notFound: true,
-      };
-    }
-
-    const company: ApiCompany = await res.json();
-    const hoursObject = formatBusinessHours(company.business_hours[0]);
-
-    return {
-      props: {
-        company: company ?? null,
-        hours: hoursObject ?? "",
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching company data:", error);
-    return {
-      notFound: true,
-    };
-  }
+  return {
+    props: {
+      companyId: parseInt(id),
+    },
+  };
 };

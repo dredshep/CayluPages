@@ -36,17 +36,23 @@ model additionals {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model business_hours {
-  id         BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
-  company_id BigInt                @db.UnsignedBigInt
-  day        business_hours_day?
-  status     business_hours_status @default(Active)
-  created_at DateTime?             @db.Timestamp(0)
-  updated_at DateTime?             @db.Timestamp(0)
-  deleted_at DateTime?             @db.Timestamp(0)
-  companies  companies             @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "business_hours_company_id_foreign")
-  shifts     shifts[]
+  id             BigInt                @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id     BigInt                @db.UnsignedBigInt
+  day_id         BigInt                @db.UnsignedBigInt
+  shift_id       BigInt                @db.UnsignedBigInt
+  open           DateTime?             @db.Time(0)
+  close          DateTime?             @db.Time(0)
+  cooking_period DateTime?             @db.Time(0)
+  status         business_hours_status @default(Active)
+  created_at     DateTime?             @db.Timestamp(0)
+  updated_at     DateTime?             @db.Timestamp(0)
+  companies      companies             @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "business_hours_company_id_foreign")
+  days           days                  @relation(fields: [day_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "business_hours_day_id_foreign")
+  shifts         shifts                @relation(fields: [shift_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "business_hours_shift_id_foreign")
 
   @@index([company_id], map: "business_hours_company_id_foreign")
+  @@index([day_id], map: "business_hours_day_id_foreign")
+  @@index([shift_id], map: "business_hours_shift_id_foreign")
 }
 
 model cache {
@@ -339,6 +345,7 @@ model products {
   allergen_product   allergen_product[]
   catalogue_sorts    catalogue_sorts[]
   order_items        order_items[]
+  product_hours      product_hours[]
   category_products  category_products  @relation(fields: [categoryproduct_id], references: [id], onUpdate: Restrict, map: "products_categoryproduct_id_foreign")
   companies          companies          @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "products_company_id_foreign")
   warehouses         warehouses         @relation(fields: [warehouse_id], references: [id], onUpdate: Restrict, map: "products_warehouse_id_foreign")
@@ -574,17 +581,11 @@ model order_item_additionals {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model shifts {
-  id               BigInt         @id @default(autoincrement()) @db.UnsignedBigInt
-  business_hour_id BigInt         @db.UnsignedBigInt
-  name             String         @db.VarChar(255)
-  open             DateTime?      @db.Time(0)
-  close            DateTime?      @db.Time(0)
-  cooking_period   DateTime?      @db.Time(0)
-  created_at       DateTime?      @db.Timestamp(0)
-  updated_at       DateTime?      @db.Timestamp(0)
-  business_hours   business_hours @relation(fields: [business_hour_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "shifts_business_hour_id_foreign")
-
-  @@index([business_hour_id], map: "shifts_business_hour_id_foreign")
+  id             BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  name           String           @db.VarChar(255)
+  created_at     DateTime?        @db.Timestamp(0)
+  updated_at     DateTime?        @db.Timestamp(0)
+  business_hours business_hours[]
 }
 
 model email_verifications {
@@ -614,6 +615,45 @@ model token_blacklist {
   created_at DateTime? @default(now()) @db.DateTime(0)
 }
 
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model days {
+  id             BigInt           @id @default(autoincrement()) @db.UnsignedBigInt
+  day            days_day?
+  created_at     DateTime?        @db.Timestamp(0)
+  updated_at     DateTime?        @db.Timestamp(0)
+  business_hours business_hours[]
+  product_hours  product_hours[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model product_hours {
+  id              BigInt               @id @default(autoincrement()) @db.UnsignedBigInt
+  product_id      BigInt               @db.UnsignedBigInt
+  day_id          BigInt               @db.UnsignedBigInt
+  productshift_id BigInt               @db.UnsignedBigInt
+  open            DateTime?            @db.Time(0)
+  close           DateTime?            @db.Time(0)
+  status          product_hours_status @default(Active)
+  created_at      DateTime?            @db.Timestamp(0)
+  updated_at      DateTime?            @db.Timestamp(0)
+  days            days                 @relation(fields: [day_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "product_hours_day_id_foreign")
+  products        products             @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "product_hours_product_id_foreign")
+  product_shift   product_shift        @relation(fields: [productshift_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "product_hours_productshift_id_foreign")
+
+  @@index([day_id], map: "product_hours_day_id_foreign")
+  @@index([product_id], map: "product_hours_product_id_foreign")
+  @@index([productshift_id], map: "product_hours_productshift_id_foreign")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model product_shift {
+  id            BigInt          @id @default(autoincrement()) @db.UnsignedBigInt
+  name          String          @db.VarChar(255)
+  created_at    DateTime?       @db.Timestamp(0)
+  updated_at    DateTime?       @db.Timestamp(0)
+  product_hours product_hours[]
+}
+
 enum payment_methods_name {
   Stripe
   Paypal
@@ -632,16 +672,6 @@ enum payment_methods_status {
   Active
   Inactive
   Trash
-}
-
-enum business_hours_day {
-  Domingo
-  Lunes
-  Martes
-  Mi_rcoles @map("Miércoles")
-  Jueves
-  Viernes
-  S_bado    @map("Sábado")
 }
 
 enum geolocations_status {
@@ -690,12 +720,6 @@ enum deliveries_order_status {
   Approved
   Rejected
   Delayed
-}
-
-enum business_hours_status {
-  Active
-  Inactive
-  Trash
 }
 
 enum products_status {
@@ -783,5 +807,25 @@ enum additionals_backup_currency {
 enum additionals_backup_status {
   Available
   Exhausted
+  Inactive
+}
+
+enum days_day {
+  Domingo
+  Lunes
+  Martes
+  Mi_rcoles @map("Miércoles")
+  Jueves
+  Viernes
+  S_bado    @map("Sábado")
+}
+
+enum product_hours_status {
+  Active
+  Inactive
+}
+
+enum business_hours_status {
+  Active
   Inactive
 }

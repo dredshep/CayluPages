@@ -14,6 +14,10 @@ import {
   order_purchases,
   orders,
   catalogue_sorts,
+  order_items,
+  products_status,
+  states,
+  warehouses,
 } from "@prisma/client";
 import JSONbig from "json-bigint";
 import Decimal from "decimal.js";
@@ -26,7 +30,13 @@ const getCompany = (companyId: number) =>
       id: companyId,
     },
     include: {
-      business_hours: true,
+      business_hours: {
+        select: {
+          days: true,
+          open: true,
+          close: true,
+        },
+      },
       additionals: true,
       category_products: true,
       cities: true,
@@ -77,14 +87,39 @@ type ConvertBigIntToNumber<T> = {
   [K in keyof T]: T[K] extends bigint
     ? number
     : T[K] extends Decimal
-    ? number
+    ? Decimal
     : T[K];
 };
 
 // Extend Prisma types to convert bigint and Decimal fields to number
-export interface ApiProduct extends ConvertBigIntToNumber<products> {
-  additionals: ApiAdditional[];
-  category_products: ConvertBigIntToNumber<category_products>;
+export interface ApiProduct
+  extends Omit<ConvertBigIntToNumber<products>, "price"> {
+  id: number;
+  company_id: number;
+  categoryproduct_id: number;
+  warehouse_id: number;
+  name: string;
+  description: string;
+  status: products_status;
+  created_at: Date | null;
+  updated_at: Date | null;
+  deleted_at: Date | null;
+  sku: string;
+  amount: number;
+  price: Decimal; // Changed from number to Decimal
+  product_image: string | null;
+  product_hours: {
+    weekday: number;
+    start_time: string;
+    end_time: string;
+  }[];
+  // Optional fields that may not always be present
+  additionals?: ApiAdditional[];
+  category_products?: ConvertBigIntToNumber<category_products>;
+  order_items?: ConvertBigIntToNumber<order_items>[];
+  warehouses?: ConvertBigIntToNumber<warehouses>;
+  companies?: { id: number };
+  _count?: { order_items: number };
 }
 
 export interface ApiCompany extends ConvertBigIntToNumber<companies> {
@@ -98,16 +133,14 @@ export interface ApiCompany extends ConvertBigIntToNumber<companies> {
   offers: ConvertBigIntToNumber<offers>[];
   order_purchases: ConvertBigIntToNumber<order_purchases>[];
   orders: ConvertBigIntToNumber<orders>[];
+  states: ConvertBigIntToNumber<states>[];
 }
 
 export type ApiAdditional = ConvertBigIntToNumber<additionals> & {
-  category_products: ConvertBigIntToNumber<category_products>;
-  // catalogue_sorts: {
-  //   additional_id: number;
-  //   product_id: number;
-  //   categoryproduct_id: number;
-  //   sort: number;
-  // };
+  category_products: {
+    id: number;
+    name: string;
+  };
   catalogue_sorts: ConvertBigIntToNumber<catalogue_sorts>[];
 };
 

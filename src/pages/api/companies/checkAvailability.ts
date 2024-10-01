@@ -7,33 +7,81 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { companyIds } = req.query;
+  // console.log("Request method:", req.method);
+  // console.log("Request body:", req.body);
+
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { companyIds, currentTime } = req.body;
+
+  if (!companyIds || !Array.isArray(companyIds) || companyIds.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "Invalid or missing companyIds in request body" });
+  }
 
   try {
-    const companyIdList = (companyIds as string)
-      .split(",")
-      .map((id) => parseInt(id, 10));
+    const { businessHoursByCompany, holidaysByCompany } =
+      await fetchBusinessHoursAndHolidays(companyIds);
 
-    if (companyIdList.length === 0) {
-      return res.status(400).json({ error: "No company IDs provided." });
+    // console.log("Business hours:", businessHoursByCompany);
+    // console.log("Holidays:", holidaysByCompany);
+
+    const now = currentTime ? moment(currentTime) : moment();
+    // console.log("Current time:", now.format());
+
+    if (!now.isValid()) {
+      return res.status(400).json({ error: "Invalid currentTime provided" });
     }
 
-    const { businessHoursByCompany, holidaysByCompany } =
-      await fetchBusinessHoursAndHolidays(companyIdList);
+    const results = companyIds.map((companyId) => {
+      try {
+        const companyHours = businessHoursByCompany[companyId.toString()] || [];
+        const todayHours = companyHours.find(
+          (hour) => hour.weekday === now.day()
+        );
 
-    const now = moment();
-    const results = companyIdList.map((companyId) => ({
-      companyId,
-      isOpen: checkIsOpen(
-        companyId,
-        businessHoursByCompany,
-        holidaysByCompany,
-        now
-      ),
-    }));
+        const isOpen = checkIsOpen(
+          companyId,
+          businessHoursByCompany,
+          holidaysByCompany,
+          now
+        );
+
+        // console.log(`Company ${companyId}:`, {
+        //   isOpen,
+        //   todayHours,
+        //   currentDay: now.day(),
+        // });
+
+        return {
+          companyId,
+          isOpen,
+          openTime: todayHours ? todayHours.start_time : null,
+          closeTime: todayHours ? todayHours.end_time : null,
+        };
+      } catch (error) {
+        console.error(`Error processing company ${companyId}:`, error);
+        return {
+          companyId,
+          isOpen: false,
+          openTime: null,
+          closeTime: null,
+          error: "Error processing company availability",
+        };
+      }
+    });
+
+    // console.log("Final results:", results);
 
     res.status(200).json(results);
   } catch (error) {
-    res.status(500).json({ error: (error as Error).message });
+    // console.error("Error in checkAvailability:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      details: (error as Error).message,
+    });
   }
 }
