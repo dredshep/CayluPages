@@ -15,8 +15,21 @@ export function checkIsProductAvailable(
 
   const timeValidator = new TimeValidator([], holidaysForValidation);
 
+  // Convert Moment.js day (0-6) to database day (1-7)
+  //   const dbWeekday = now.day() === 0 ? 7 : now.day();
+  const dayMap = {
+    0: 1,
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    5: 6,
+    6: 7,
+  } as const;
+  const dbWeekday = dayMap[now.day() as keyof typeof dayMap];
+
   const todayProductHours = productHoursForValidation.filter(
-    (hour) => hour.weekday === now.day()
+    (hour) => hour.weekday === dbWeekday
   );
 
   for (const productHour of todayProductHours) {

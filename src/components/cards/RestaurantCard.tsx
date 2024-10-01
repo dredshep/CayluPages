@@ -82,13 +82,13 @@ const RestaurantCard: React.FC<RestaurantCardProps> = ({
           height={Math.ceil(height * 0.75)}
           quality={100}
         />
-        {!isAvailable && (
+        {/* {!isAvailable && (
           <div className="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 flex items-center justify-center">
             <span className="text-white text-2xl font-bold">
               Currently Unavailable
             </span>
           </div>
-        )}
+        )} */}
       </div>
       <div className="max-h-max leading-5 3xl:leading-[1.324] flex flex-col items-center mt-3 gap-2">
         <div className="flex justify-between w-full flex-row">

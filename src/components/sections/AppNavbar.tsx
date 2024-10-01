@@ -66,7 +66,9 @@ export default function AppNavbar() {
           {browserSideCartProductCount}
         </div>
       </div>
-      {isPopoverVisible && <CartPopover onClose={handleClosePopover} />}
+      {isPopoverVisible && (
+        <CartPopover isOpen={isPopoverVisible} onClose={handleClosePopover} />
+      )}
       {/* Sign up and Sign in */}
       <Link href="/signup" className="text-black">
         Regístrate

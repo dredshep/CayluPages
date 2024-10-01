@@ -32,9 +32,9 @@ export default async function handler(
       fetchProductHours(productIds),
       fetchBusinessHoursAndHolidays([companyId]),
     ]);
-    console.log(
-      JSON.stringify(transformBigIntToNumber(productHoursByProduct[1]), null, 2)
-    );
+    // console.log(
+    //   JSON.stringify(transformBigIntToNumber(productHoursByProduct[1]), null, 2)
+    // );
 
     const now = moment(currentTime);
 

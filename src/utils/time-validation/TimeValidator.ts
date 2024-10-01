@@ -31,7 +31,9 @@ class TimeValidator {
     targetTime: Moment,
     businessHour: BusinessHour
   ): boolean {
-    const weekday = targetTime.day(); // Get the weekday (0 for Sunday, 1 for Monday, etc.)
+    // const weekday = targetTime.day(); // Get the weekday (0 for Sunday, 1 for Monday, etc.)
+    // 1 is sunday, 2 is monday, 3 is tuesday, etc.
+    const weekday = targetTime.day() + 1;
 
     // If it's not the same weekday, it's automatically out of range
     if (businessHour.weekday !== weekday) return false;
@@ -79,7 +81,9 @@ class TimeValidator {
   // Validate if a given time is within the product hours for a specific weekday
   validateProductHours(targetTime: Moment, productHour: ProductHour): boolean {
     // Similar to validateBusinessHours, but for products
-    const weekday = targetTime.day();
+    const weekday = targetTime.day() + 1;
+    console.log("weekday", weekday);
+    console.log("productHour.weekday", productHour.weekday);
     if (productHour.weekday !== weekday) return false;
 
     const productStart = moment(
@@ -91,7 +95,14 @@ class TimeValidator {
       "YYYY-MM-DD HH:mm"
     );
 
-    return targetTime.isBetween(productStart, productEnd, undefined, "[]");
+    const isBetween = targetTime.isBetween(
+      productStart,
+      productEnd,
+      undefined,
+      "[]"
+    );
+    console.log("isBetween", isBetween);
+    return isBetween;
   }
 
   // Check if a product is available at a specific time
@@ -100,6 +111,7 @@ class TimeValidator {
     targetTime: Moment
   ): boolean {
     const isHoliday = this.validateHoliday(targetTime);
+    console.log("isHoliday", isHoliday);
     if (isHoliday) return false;
     return this.validateProductHours(targetTime, productHour);
   }

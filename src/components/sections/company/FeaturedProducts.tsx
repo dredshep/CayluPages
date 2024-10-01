@@ -48,6 +48,9 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({
           (p) => p.id === product.id
         );
         const isAvailable = storeProduct?.isAvailable ?? true;
+        // if (product.id === 1) {
+        //   console.log("availability log", storeProduct);
+        // }
         return (
           <div
             key={product.id.toString()}
@@ -110,6 +113,7 @@ const FeaturedProducts: FC<FeaturedProductsProps> = ({
       })}
       {selectedProduct && (
         <AddProductModal
+          isOpen={true}
           product={{
             p_id: Number(selectedProduct.id),
             image: getPlaceholderImageUrl({
