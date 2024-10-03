@@ -6,12 +6,19 @@ import MagnifyingGlassIcon from "@components/icons/navbar/MagnifyingGlassIcon";
 import CartIcon from "@components/icons/navbar/CartIcon";
 import CartPopover from "@components/sections/cart/CartPopover";
 import { useCartStore2 } from "@/store/useCartStore2";
+import useAuth from "@/hooks/useAuth";
+import LoginModal from "@components/sections/LoginForm/LoginModal";
+import { useLoginModalStore } from "@/store/useLoginModalStore";
 
 export default function AppNavbar() {
   const [isPopoverVisible, setPopoverVisible] = useState(false);
   const cartProductCount = useCartStore2(
     (state) => state.cart?.products?.length ?? 0
   );
+  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+  const { openModal } = useLoginModalStore();
 
   const [browserSideCartProductCount, setBrowserSideCartProductCount] =
     useState<number>(0);
@@ -70,15 +77,30 @@ export default function AppNavbar() {
         <CartPopover isOpen={isPopoverVisible} onClose={handleClosePopover} />
       )}
       {/* Sign up and Sign in */}
-      <Link href="/signup" className="text-black">
-        Regístrate
-      </Link>
-      <Link
-        href="/signin"
-        className="text-black bg-teal-400 rounded-full px-[26px] py-[13px] select-none hover:opacity-70 transition-all duration-100 cursor-pointer"
-      >
-        Iniciar sesión
-      </Link>
+      {isAuthenticated ? (
+        <div className="flex items-center gap-4">
+          <span>Welcome, {user?.name || user?.email}</span>
+          <button
+            onClick={logout}
+            className="text-black bg-teal-400 rounded-full px-[26px] py-[13px] select-none hover:opacity-70 transition-all duration-100 cursor-pointer"
+          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <>
+          <button onClick={() => openModal("register")} className="text-black">
+            Regístrate
+          </button>
+          <button
+            onClick={() => openModal("login")}
+            className="text-black bg-teal-400 rounded-full px-[26px] py-[13px] select-none hover:opacity-70 transition-all duration-100 cursor-pointer"
+          >
+            Iniciar sesión
+          </button>
+        </>
+      )}
+      <LoginModal onClose={() => {}} />
     </div>
   );
 }

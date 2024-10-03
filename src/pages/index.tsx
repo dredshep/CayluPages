@@ -3,28 +3,16 @@ import LocationIcon from "@components/icons/navbar/LocationIcon";
 import HamburgerIcon from "@components/icons/navbar/HamburgerIcon";
 import RestaurantCard from "@components/cards/RestaurantCard";
 import { popularEnTuZona, ofertasDeHoy } from "@/dummyData/frontpageCardData";
-import AppDownloadCTA from "@components/sections/AppDownloadCTA";
 import TrabajaconNosotrosCTA from "@components/sections/TrabajaConNosotrosCTA";
 import ReviewCard from "@components/cards/ReviewCard";
 import reviews from "@/dummyData/reviews";
-import Image from "next/image";
 import LoginModal from "@/components/sections/LoginForm/LoginModal";
-import { useEffect, useState } from "react";
+import { useLoginModalStore } from "@/store/useLoginModalStore";
+import useAuth from "@/hooks/useAuth";
 
 function Navbar() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"login" | "register" | "recovery">("login");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = document.cookie.split('; ').find(row => row.startsWith('auth_token='));
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const openLoginModal = (tab: "login" | "register") => {
-    setActiveTab(tab);
-    setIsLoginModalOpen(true);
-  };
+  const { openModal } = useLoginModalStore();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <nav>
@@ -33,22 +21,28 @@ function Navbar() {
           <HamburgerIcon className="" />
         </div>
         <div className="flex gap-4">
-          {isLoggedIn ? (
-            <div
-              className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px] select-none cursor-pointer hover:brightness-110 transition-all duration-100"
-            >
-              Mi Cuenta
+          {isAuthenticated ? (
+            <div className="flex items-center gap-4">
+              <div className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px] select-none cursor-pointer hover:brightness-110 transition-all duration-100">
+                Mi Cuenta
+              </div>
+              <button
+                onClick={logout}
+                className="text-xl font-semibold bg-white rounded-full px-[26px] py-[13px] select-none hover:brightness-90 transition-all duration-100 cursor-pointer"
+              >
+                Cerrar sesión
+              </button>
             </div>
           ) : (
             <>
               <div
-                onClick={() => openLoginModal("register")}
+                onClick={() => openModal("register")}
                 className="text-xl font-semibold bg-white rounded-full px-[26px] py-[13px] select-none hover:brightness-90 transition-all duration-100 cursor-pointer"
               >
                 Regístrate
               </div>
               <div
-                onClick={() => openLoginModal("login")}
+                onClick={() => openModal("login")}
                 className="text-xl font-semibold bg-teal-400 rounded-full px-[26px] py-[13px] select-none cursor-pointer hover:brightness-110 transition-all duration-100"
               >
                 Iniciar sesión
@@ -57,15 +51,11 @@ function Navbar() {
           )}
         </div>
       </div>
-      {isLoginModalOpen && (
-        <LoginModal 
-          onClose={() => setIsLoginModalOpen(false)} 
-          initialActiveTab={activeTab}
-        />
-      )}
+      <LoginModal onClose={() => {}} />
     </nav>
   );
 }
+
 export default function Home() {
   return (
     <div className="bg-white">
@@ -101,7 +91,7 @@ export default function Home() {
         <div className="flex gap-5 flex-wrap">
           {popularEnTuZona.map((restaurant, index) => (
             <div key={index} className="flex-1 px-2 mb-4">
-              <RestaurantCard {...restaurant} />
+              <RestaurantCard {...restaurant} companyId={1} />
             </div>
           ))}
         </div>
@@ -115,14 +105,13 @@ export default function Home() {
         <div className="flex gap-5 flex-wrap">
           {ofertasDeHoy.map((restaurant, index) => (
             <div key={index} className="flex-1 px-2 mb-4">
-              <RestaurantCard {...restaurant} />
+              <RestaurantCard {...restaurant} companyId={1} />
             </div>
           ))}
         </div>
       </div>
 
       <hr className="w-full h-0.5 bg-neutral-400 mt-[51px]" />
-      {/* <AppDownloadCTA /> */}
       <TrabajaconNosotrosCTA />
       <div className="w-full mb-12">
         <div className="flex flex-col justify-center h-full w-full px-[129px] gap-[71px]">
@@ -139,7 +128,6 @@ export default function Home() {
           </button>
         </div>
       </div>
-      {/* <Image src="http://192.168.22.118/assets/Baseball Bat.jpg" alt="baseball bat" width={500} height={500} /> */}
     </div>
   );
 }

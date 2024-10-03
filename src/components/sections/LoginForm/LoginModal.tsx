@@ -6,6 +6,8 @@ import Message from "./Message";
 import TabNavigation from "./TabNavigation";
 import useAuth from "@/hooks/useAuth";
 import { handleRecovery } from "./authUtils";
+import { useLoginModalStore } from "@/store/useLoginModalStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface LoginModalProps {
   onClose: () => void;
@@ -17,19 +19,21 @@ interface FormData {
   email: string;
   password: string;
   confirmPassword?: string; // For register tab only
+  dni: string; // Now optional
   rememberMe: boolean;
 }
 
-export default function LoginModal({
-  onClose,
-  initialActiveTab = "login",
-}: LoginModalProps) {
-  const [activeTab, setActiveTab] = useState<"login" | "register" | "recovery">(
-    initialActiveTab
-  );
+export default function LoginModal({ onClose }: LoginModalProps) {
+  const {
+    isOpen,
+    activeTab,
+    closeModal: closeModalStore,
+    setActiveTab,
+  } = useLoginModalStore();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { loading, error, login, register, recover } = useAuth();
+  const { login: storeLogin } = useAuthStore();
 
   const {
     register: registerField,
@@ -52,7 +56,7 @@ export default function LoginModal({
     setErrorMessage(null);
     setSuccessMessage(null);
     clearErrors();
-    reset({ email: currentEmail }); // Reset form but keep the email
+    reset({ email: currentEmail });
   };
 
   const onSubmit = async (data: FormData) => {
@@ -62,48 +66,65 @@ export default function LoginModal({
     try {
       if (activeTab === "register") {
         if (data.password !== data.confirmPassword) {
-          throw new Error("Passwords do not match.");
+          throw new Error("Las contraseñas no coinciden.");
         }
-        await register(emailLowerCase, data.password, data.name);
+        await register(emailLowerCase, data.password, data.name, data.dni);
         setSuccessMessage(
-          "Registration successful. Please check your email to verify your account."
+          "Registro exitoso. Por favor, revisa tu correo electrónico para verificar tu cuenta."
         );
       } else if (activeTab === "login") {
         const response = await login(emailLowerCase, data.password);
         if (response.token) {
           document.cookie = `auth_token=${response.token}; path=/; secure; samesite=strict`;
-          onClose();
+          storeLogin({
+            id: response.user.id.toString(),
+            email: response.user.email,
+            name: response.user.name,
+            email_verified_at: response.user.email_verified_at,
+          });
+          closeModal(); // Use the new closeModal function
         }
       } else if (activeTab === "recovery") {
         await recover(emailLowerCase);
-        setSuccessMessage("Recovery email sent. Please check your inbox.");
+        setSuccessMessage(
+          "Correo de recuperación enviado. Por favor, revisa tu bandeja de entrada."
+        );
       }
     } catch (err: any) {
       if (activeTab === "register") {
         if (err.message === "User already exists") {
           setError("email", {
             type: "manual",
-            message: "Email is already taken. Do you want to login instead?",
+            message:
+              "El correo electrónico ya está registrado. ¿Quieres iniciar sesión en su lugar?",
           });
         }
       } else {
         if (err.message === "Invalid credentials.") {
           setInvalidCredentials(true);
           setErrorMessage(
-            "Invalid credentials. Please check your email and password."
+            "Credenciales inválidas. Por favor, verifica tu correo electrónico y contraseña."
           );
         } else {
-          console.error("Submit error in LoginModal:", err);
-          setErrorMessage(err.message || "An unexpected error occurred");
+          console.error("Error en el envío en LoginModal:", err);
+          setErrorMessage(err.message || "Ha ocurrido un error inesperado");
         }
       }
     }
   };
 
-  // Clear invalid credentials state when switching tabs
+  const closeModal = () => {
+    reset(); // Reset the form
+    closeModalStore(); // Close the modal using the store function
+  };
+
   useEffect(() => {
-    setInvalidCredentials(false);
-  }, [activeTab]);
+    if (!isOpen) {
+      reset(); // Reset the form when the modal closes
+    }
+  }, [isOpen, reset]);
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -111,14 +132,14 @@ export default function LoginModal({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">
             {activeTab === "login"
-              ? "Login"
+              ? "Iniciar sesión"
               : activeTab === "register"
-              ? "Register"
-              : "Password Recovery"}
+              ? "Registro"
+              : "Recuperar contraseña"}
           </h2>
           <button
             className="text-gray-500 hover:text-gray-800"
-            onClick={onClose}
+            onClick={closeModal} // Use the new closeModal function
           >
             X
           </button>
@@ -135,22 +156,22 @@ export default function LoginModal({
         {activeTab !== "recovery" ? (
           <form onSubmit={handleSubmit(onSubmit)}>
             <InputField
-              label="Email"
+              label="Correo electrónico"
               type="email"
               register={registerField("email", {
-                required: "Email is required",
+                required: "Es obligatorio introducir un correo electrónico",
               })}
               error={errors.email?.message}
               className={invalidCredentials ? "border-red-500" : ""}
             />
             <InputField
-              label="Password"
+              label="Contraseña"
               type="password"
               register={registerField("password", {
-                required: "Password is required",
+                required: "Es obligatorio introducir una contraseña",
                 minLength: {
                   value: 6,
-                  message: "Password must be at least 6 characters",
+                  message: "La contraseña debe tener al menos 6 caracteres",
                 },
               })}
               error={errors.password?.message}
@@ -158,19 +179,44 @@ export default function LoginModal({
             />
             {invalidCredentials && (
               <p className="text-red-500 text-sm mt-2 mb-4">
-                Invalid credentials. Please check your email and password.
+                Credenciales inválidas. Por favor, verifica tu correo
+                electrónico y contraseña.
               </p>
             )}
 
             {activeTab === "register" && (
-              <InputField
-                label="Name"
-                type="text"
-                register={registerField("name", {
-                  required: "Name is required",
-                })}
-                error={errors.name?.message}
-              />
+              <>
+                <InputField
+                  label="Nombre"
+                  type="text"
+                  register={registerField("name", {
+                    required: "Es obligatorio introducir un nombre",
+                  })}
+                  error={errors.name?.message}
+                />
+                <InputField
+                  label="DNI o NIE"
+                  type="text"
+                  register={registerField("dni", {
+                    required: "Es obligatorio introducir un DNI o NIE",
+                    pattern: {
+                      value: /^[XYZ]?([0-9]{7,8})([A-Z])$/,
+                      message: "El formato del DNI o NIE es incorrecto",
+                    },
+                  })}
+                  error={errors.dni?.message}
+                />
+                <InputField
+                  label="Confirmar contraseña"
+                  type="password"
+                  register={registerField("confirmPassword", {
+                    required: "Es obligatorio confirmar la contraseña",
+                    validate: (value) =>
+                      value === password || "Las contraseñas no coinciden",
+                  })}
+                  error={errors.confirmPassword?.message}
+                />
+              </>
             )}
 
             {/* Forgot Password Link for Login Tab */}
@@ -184,19 +230,6 @@ export default function LoginModal({
                   Forgot Password?
                 </button>
               </div>
-            )}
-
-            {activeTab === "register" && (
-              <InputField
-                label="Confirm Password"
-                type="password"
-                register={registerField("confirmPassword", {
-                  required: "Confirm Password is required",
-                  validate: (value) =>
-                    value === password || "Passwords do not match",
-                })}
-                error={errors.confirmPassword?.message}
-              />
             )}
 
             <div className="flex items-center mb-4">

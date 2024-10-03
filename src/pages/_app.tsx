@@ -1,14 +1,43 @@
+import { useEffect } from "react";
 import Footer from "@/components/sections/Footer";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Noto_Sans } from "next/font/google";
+import { useAuthStore } from "@/store/useAuthStore";
+import api from "@/utils/api";
+import { appWithTranslation } from "next-i18next";
+import AuthWrapper from "@/components/auth/AuthWrapper";
 const noto = Noto_Sans({ subsets: ["latin"] });
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const response = await api.get("/auth/me");
+        if (response.data.user) {
+          useAuthStore.getState().login({
+            id: response.data.user.id,
+            email: response.data.user.email,
+            name: response.data.user.name,
+            email_verified_at: response.data.user.email_verified_at,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to initialize auth:", error);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
   return (
     <main className={noto.className}>
-      <Component {...pageProps} />
+      <AuthWrapper>
+        <Component {...pageProps} />
+      </AuthWrapper>
       <Footer />
     </main>
   );
 }
+
+export default appWithTranslation(App);

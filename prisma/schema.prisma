@@ -182,18 +182,17 @@ model deliveries {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model employee_details {
-  id         BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
-  user_id    BigInt                    @db.UnsignedBigInt
-  dni        String                    @db.VarChar(255)
-  address    String                    @db.VarChar(255)
-  job_type   employee_details_job_type @default(Full_time)
-  date_start DateTime                  @db.Date
-  date_end   DateTime?                 @db.Date
-  status     employee_details_status   @default(Active)
-  created_at DateTime?                 @db.Timestamp(0)
-  updated_at DateTime?                 @db.Timestamp(0)
-  deleted_at DateTime?                 @db.Timestamp(0)
-  users      users                     @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "employee_details_user_id_foreign")
+  id           BigInt                     @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id      BigInt                     @db.UnsignedBigInt
+  num_employee Int                        @unique(map: "employee_details_num_employee_unique")
+  job_type     employee_details_job_type? @default(Full_time)
+  date_start   DateTime?                  @db.Date
+  date_end     DateTime?                  @db.Date
+  status       employee_details_status    @default(Active)
+  created_at   DateTime?                  @db.Timestamp(0)
+  updated_at   DateTime?                  @db.Timestamp(0)
+  deleted_at   DateTime?                  @db.Timestamp(0)
+  users        users                      @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "employee_details_user_id_foreign")
 
   @@index([user_id], map: "employee_details_user_id_foreign")
 }
@@ -380,18 +379,24 @@ model states {
 }
 
 model users {
-  id                BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
-  name              String             @db.VarChar(255)
-  email             String             @unique(map: "users_email_unique") @db.VarChar(255)
-  email_verified_at DateTime?          @db.Timestamp(0)
-  password          String             @db.VarChar(255)
-  remember_token    String?            @db.VarChar(100)
-  created_at        DateTime?          @db.Timestamp(0)
-  updated_at        DateTime?          @db.Timestamp(0)
-  address           String?            @db.Text
-  clients           clients[]
-  deliveries        deliveries[]
-  employee_details  employee_details[]
+  id                 BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  name               String             @db.VarChar(255)
+  email              String             @unique(map: "users_email_unique") @db.VarChar(255)
+  image              String?            @db.VarChar(255)
+  email_verified_at  DateTime?          @db.Timestamp(0)
+  password           String             @db.VarChar(255)
+  dni                String             @unique(map: "users_dni_unique") @db.VarChar(255)
+  address            String?            @db.VarChar(255)
+  phone              String?            @db.VarChar(255)
+  status             users_status       @default(Active)
+  remember_token     String?            @db.VarChar(100)
+  created_at         DateTime?          @db.Timestamp(0)
+  updated_at         DateTime?          @db.Timestamp(0)
+  deleted_at         DateTime?          @db.Timestamp(0)
+  verification_token String?            @db.Text
+  clients            clients[]
+  deliveries         deliveries[]
+  employee_details   employee_details[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -828,4 +833,10 @@ enum product_hours_status {
 enum business_hours_status {
   Active
   Inactive
+}
+
+enum users_status {
+  Active
+  Inactive
+  Trash
 }

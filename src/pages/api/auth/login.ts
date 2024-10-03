@@ -6,6 +6,16 @@ import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
+export interface LoginResponse {
+  message: string;
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    email_verified_at: Date | null;
+  };
+}
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -36,12 +46,16 @@ export default async function handler(
         return res.status(401).json({ error: "Invalid credentials." });
       }
 
+      // Convert BigInt to Number for JWT payload
+      const userId = Number(user.id);
+
       // Generate a JWT token
       const token = jwt.sign(
         {
-          id: user.id,
+          id: userId,
           email: user.email,
           name: user.name,
+          email_verified_at: user.email_verified_at,
         },
         process.env.JWT_SECRET || "your_jwt_secret1233",
         { expiresIn: "1h" }
@@ -52,11 +66,12 @@ export default async function handler(
         message: "Login successful",
         token,
         user: {
-          id: user.id,
+          id: userId,
           name: user.name,
           email: user.email,
+          email_verified_at: user.email_verified_at,
         },
-      });
+      } as LoginResponse);
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ error: "Internal server error" });
