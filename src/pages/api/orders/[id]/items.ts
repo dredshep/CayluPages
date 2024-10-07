@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { id } = req.query;
 
@@ -36,7 +36,7 @@ export default async function handler(
             }
             await prisma.order_item_additionals.create({
               data: {
-                order_item_id: orderItem.id,
+                orderitem_id: orderItem.id,
                 additional_id: additional.additional_id,
                 quantity: additional.quantity,
                 price: additional.price,

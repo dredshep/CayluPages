@@ -27,7 +27,6 @@ model additionals {
   products               products                 @relation(fields: [product_id], references: [id], onUpdate: Restrict, map: "additionals_product_id_foreign")
   catalogue_sorts        catalogue_sorts[]
   order_item_additionals order_item_additionals[]
-  order_items            order_items[]
 
   @@index([company_id], map: "additionals_company_id_foreign")
   @@index([product_id], map: "additionals_product_id_foreign")
@@ -152,6 +151,7 @@ model companies {
   geolocations      geolocations           @relation(fields: [geolocation_id], references: [id], onUpdate: Restrict, map: "companies_geolocation_id_foreign")
   states            states                 @relation(fields: [state_id], references: [id], onUpdate: Restrict, map: "companies_state_id_foreign")
   company_holidays  company_holidays[]
+  delivery_rates    delivery_rates[]
   offers            offers[]
   order_purchases   order_purchases[]
   orders            orders[]
@@ -384,6 +384,7 @@ model users {
   email              String             @unique(map: "users_email_unique") @db.VarChar(255)
   image              String?            @db.VarChar(255)
   email_verified_at  DateTime?          @db.Timestamp(0)
+  verification_token String?            @db.Text
   password           String             @db.VarChar(255)
   dni                String             @unique(map: "users_dni_unique") @db.VarChar(255)
   address            String?            @db.VarChar(255)
@@ -393,7 +394,6 @@ model users {
   created_at         DateTime?          @db.Timestamp(0)
   updated_at         DateTime?          @db.Timestamp(0)
   deleted_at         DateTime?          @db.Timestamp(0)
-  verification_token String?            @db.Text
   clients            clients[]
   deliveries         deliveries[]
   employee_details   employee_details[]
@@ -471,18 +471,15 @@ model order_items {
   id                     BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
   order_id               BigInt                   @db.UnsignedBigInt
   product_id             BigInt?                  @db.UnsignedBigInt
-  additional_id          BigInt?                  @db.UnsignedBigInt
   quantity               Int
   price                  Decimal                  @db.Decimal(8, 2)
   created_at             DateTime?                @db.Timestamp(0)
   updated_at             DateTime?                @db.Timestamp(0)
   deleted_at             DateTime?                @db.Timestamp(0)
   order_item_additionals order_item_additionals[]
-  additionals            additionals?             @relation(fields: [additional_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "order_items_additional_id_foreign")
   orders                 orders                   @relation(fields: [order_id], references: [id], onUpdate: Restrict, map: "order_items_order_id_foreign")
   products               products?                @relation(fields: [product_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "order_items_product_id_foreign")
 
-  @@index([additional_id], map: "order_items_additional_id_foreign")
   @@index([order_id], map: "order_items_order_id_foreign")
   @@index([product_id], map: "order_items_product_id_foreign")
 }
@@ -569,19 +566,19 @@ model allergens {
 }
 
 model order_item_additionals {
-  id            BigInt      @id @default(autoincrement()) @db.UnsignedBigInt
-  order_item_id BigInt      @db.UnsignedBigInt
-  additional_id BigInt      @db.UnsignedBigInt
+  id            BigInt       @id @default(autoincrement()) @db.UnsignedBigInt
+  orderitem_id  BigInt       @db.UnsignedBigInt
+  additional_id BigInt?      @db.UnsignedBigInt
   quantity      Int
-  price         Decimal     @db.Decimal(8, 2)
-  created_at    DateTime?   @default(now()) @db.Timestamp(0)
-  updated_at    DateTime?   @default(now()) @db.Timestamp(0)
-  deleted_at    DateTime?   @db.Timestamp(0)
-  order_items   order_items @relation(fields: [order_item_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "order_item_additionals_ibfk_1")
-  additionals   additionals @relation(fields: [additional_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "order_item_additionals_ibfk_2")
+  price         Decimal      @db.Decimal(8, 2)
+  created_at    DateTime?    @db.Timestamp(0)
+  updated_at    DateTime?    @db.Timestamp(0)
+  deleted_at    DateTime?    @db.Timestamp(0)
+  additionals   additionals? @relation(fields: [additional_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "order_item_additionals_ibfk_2")
+  order_items   order_items  @relation(fields: [orderitem_id], references: [id], onUpdate: Restrict, map: "order_item_additionals_orderitem_id_foreign")
 
-  @@index([additional_id], map: "additional_id")
-  @@index([order_item_id], map: "order_item_id")
+  @@index([additional_id], map: "order_item_additionals_additional_id_foreign")
+  @@index([orderitem_id], map: "order_item_additionals_orderitem_id_foreign")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -657,6 +654,22 @@ model product_shift {
   created_at    DateTime?       @db.Timestamp(0)
   updated_at    DateTime?       @db.Timestamp(0)
   product_hours product_hours[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model delivery_rates {
+  id          BigInt                  @id @default(autoincrement()) @db.UnsignedBigInt
+  company_id  BigInt                  @db.UnsignedBigInt
+  from_km     Decimal                 @db.Decimal(8, 2)
+  to_km       Decimal                 @db.Decimal(8, 2)
+  service_fee Decimal                 @db.Decimal(8, 2)
+  currency    delivery_rates_currency @default(EUR)
+  created_at  DateTime?               @db.Timestamp(0)
+  updated_at  DateTime?               @db.Timestamp(0)
+  deleted_at  DateTime?               @db.Timestamp(0)
+  companies   companies               @relation(fields: [company_id], references: [id], onUpdate: Restrict, map: "delivery_rates_company_id_foreign")
+
+  @@index([company_id], map: "delivery_rates_company_id_foreign")
 }
 
 enum payment_methods_name {
@@ -839,4 +852,9 @@ enum users_status {
   Active
   Inactive
   Trash
+}
+
+enum delivery_rates_currency {
+  USD
+  EUR
 }

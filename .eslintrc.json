@@ -1,17 +1,19 @@
 {
-  "extends": "next/core-web-vitals",
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
 
   "rules": {
     "@typescript-eslint/no-explicit-any": "error",
-    "@typescript-eslint/explicit-function-return-type": "error",
-    "@typescript-eslint/explicit-module-boundary-types": "error",
-    "@typescript-eslint/no-implicit-any-catch": "error",
+    "@typescript-eslint/explicit-function-return-type": "off", // Disabled for your preference
+    "@typescript-eslint/explicit-module-boundary-types": "off", // Disabled for your preference
+    "@typescript-eslint/no-implicit-any-catch": "off",
     "no-var": "error",
     "prefer-const": "error"
   },
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.json",
+    "sourceType": "module",
+    "ecmaVersion": 2020
   }
 }

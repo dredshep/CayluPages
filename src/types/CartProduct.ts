@@ -10,11 +10,11 @@ export type CartProduct = {
   currency: string;
   quantity: number;
   name: string;
-  additionals?: Additional[];
+  additionals?: CartAdditional[];
   // opts: Record<string, any>; // Flexible options field
 };
 
-export interface Additional extends ApiAdditional {
+export interface CartAdditional extends ApiAdditional {
   quantity?: number;
   category_name: string;
   category_id: number;

@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { CartProduct } from "@/types";
-import { ApiAdditional } from "@/pages/api/companies/[id]";
-type Additional = ApiAdditional;
+import { CartAdditional, CartProduct } from "@/types";
 type Cart = {
   company_id: number;
   products: CartProduct[] | undefined;
@@ -14,7 +12,7 @@ interface CartState {
   updateProductQuantity: (product_id: number, quantity: number) => void;
   updateProductAdditionals: (
     product_id: number,
-    additionals: Additional[],
+    additionals: CartAdditional[],
   ) => void;
   removeProduct: (product_id: number) => void;
   clearCart: () => void;
@@ -22,10 +20,10 @@ interface CartState {
 
 // Helper function to merge additionals quantities
 const mergeAdditionals = (
-  existingAdditionals: Additional[] = [],
-  newAdditionals: Additional[] = [],
-): Additional[] => {
-  const additionalsMap = new Map<number, Additional>();
+  existingAdditionals: CartAdditional[] = [],
+  newAdditionals: CartAdditional[] = [],
+): CartAdditional[] => {
+  const additionalsMap = new Map<number, CartAdditional>();
 
   [...existingAdditionals, ...newAdditionals].forEach((additional) => {
     const existing = additionalsMap.get(additional.id);
@@ -59,13 +57,13 @@ export const useCartStore2 = create<CartState>()(
     (set) => ({
       cart: null, // Initial state
 
-      addProduct: (company_id, product) => {
+      addProduct: (company_id: number, product: CartProduct) => {
         set((state) => ({
-          cart: updateCart(state, (currentCart) => {
+          cart: updateCart(state, (currentCart: Cart) => {
             const isSameCompany = currentCart &&
               currentCart.company_id === company_id;
-            const existingProduct = isSameCompany
-              ? currentCart.products?.find((p) => p.p_id === product.p_id)
+            const existingProduct = isSameCompany && currentCart.products
+              ? currentCart.products.find((p) => p.p_id === product.p_id)
               : null;
 
             const updatedProducts = existingProduct

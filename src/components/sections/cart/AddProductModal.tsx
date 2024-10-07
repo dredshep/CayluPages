@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import { useState, useEffect } from "react";
 import { useCartStore2 } from "@/store/useCartStore2";
-import { CartProduct, Additional } from "@/types/CartProduct";
+import { CartProduct, CartAdditional } from "@/types/CartProduct";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
 import Image from "next/image";
 import { Dialog, Transition, TransitionChild } from "@headlessui/react";
@@ -64,12 +64,12 @@ export default function AddProductModal({
   };
 
   const handleAddOrUpdateProduct = () => {
-    const updatedAdditionals: Additional[] = (product.additionals || []).map(
-      (additional) => ({
-        ...additional,
-        quantity: additionalQuantities[additional.id.toString()] || 0,
-      })
-    );
+    const updatedAdditionals: CartAdditional[] = (
+      product.additionals || []
+    ).map((additional) => ({
+      ...additional,
+      quantity: additionalQuantities[additional.id.toString()] || 0,
+    }));
 
     const updatedProduct = {
       ...product,
@@ -108,7 +108,7 @@ export default function AddProductModal({
     }
     acc[categoryName].push(additional);
     return acc;
-  }, {} as { [key: string]: Additional[] });
+  }, {} as { [key: string]: CartAdditional[] });
 
   // Sort the additionals in each category by the sort number
   if (groupedAdditionals) {
