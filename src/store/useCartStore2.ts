@@ -14,7 +14,7 @@ interface CartState {
   updateProductQuantity: (product_id: number, quantity: number) => void;
   updateProductAdditionals: (
     product_id: number,
-    additionals: Additional[]
+    additionals: Additional[],
   ) => void;
   removeProduct: (product_id: number) => void;
   clearCart: () => void;
@@ -23,9 +23,9 @@ interface CartState {
 // Helper function to merge additionals quantities
 const mergeAdditionals = (
   existingAdditionals: Additional[] = [],
-  newAdditionals: Additional[] = []
+  newAdditionals: Additional[] = [],
 ): Additional[] => {
-  const additionalsMap = new Map<bigint, Additional>();
+  const additionalsMap = new Map<number, Additional>();
 
   [...existingAdditionals, ...newAdditionals].forEach((additional) => {
     const existing = additionalsMap.get(additional.id);
@@ -33,7 +33,7 @@ const mergeAdditionals = (
     if (existing) {
       additionalsMap.set(additional.id, {
         ...existing,
-        quantity: (existing.quantity || 0) + (additional.quantity || 0),
+        amount: (existing.amount || 0) + (additional.amount || 0),
       });
     } else {
       additionalsMap.set(additional.id, additional);
@@ -46,11 +46,11 @@ const mergeAdditionals = (
 // Helper function to handle cart updates
 const updateCart = (
   state: CartState,
-  updateFn: (currentCart: Cart) => Cart
+  updateFn: (currentCart: Cart) => Cart,
 ): Cart => {
   const currentCart = state.cart;
   return updateFn(
-    currentCart ? { ...currentCart } : { company_id: 0, products: [] }
+    currentCart ? { ...currentCart } : { company_id: 0, products: [] },
   );
 };
 
@@ -62,25 +62,25 @@ export const useCartStore2 = create<CartState>()(
       addProduct: (company_id, product) => {
         set((state) => ({
           cart: updateCart(state, (currentCart) => {
-            const isSameCompany =
-              currentCart && currentCart.company_id === company_id;
+            const isSameCompany = currentCart &&
+              currentCart.company_id === company_id;
             const existingProduct = isSameCompany
               ? currentCart.products?.find((p) => p.p_id === product.p_id)
               : null;
 
             const updatedProducts = existingProduct
               ? currentCart.products?.map((p) =>
-                  p.p_id === product.p_id
-                    ? {
-                        ...p,
-                        quantity: p.quantity + product.quantity,
-                        additionals: mergeAdditionals(
-                          p.additionals,
-                          product.additionals
-                        ),
-                      }
-                    : p
-                )
+                p.p_id === product.p_id
+                  ? {
+                    ...p,
+                    quantity: p.quantity + product.quantity,
+                    additionals: mergeAdditionals(
+                      p.additionals,
+                      product.additionals,
+                    ),
+                  }
+                  : p
+              )
               : [...(currentCart?.products || []), product];
 
             return {
@@ -118,7 +118,7 @@ export const useCartStore2 = create<CartState>()(
           cart: updateCart(state, (currentCart) => ({
             ...currentCart,
             products: currentCart.products?.filter(
-              (p) => p.p_id !== product_id
+              (p) => p.p_id !== product_id,
             ),
           })),
         }));
@@ -131,6 +131,6 @@ export const useCartStore2 = create<CartState>()(
     {
       name: "cart-storage", // Name of the storage item
       getStorage: () => localStorage, // Returns the storage area
-    }
-  )
+    },
+  ),
 );

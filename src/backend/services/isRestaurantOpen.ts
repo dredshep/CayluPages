@@ -19,7 +19,8 @@ export async function isRestaurantOpen(restaurantId: bigint): Promise<boolean> {
   const businessHour = await prisma.business_hours.findFirst({
     where: {
       company_id: restaurantId,
-      day: todayName,
+      // day: todayName,
+      day_id: today,
     },
     include: {
       companies: true, // Include related company data
@@ -85,7 +86,7 @@ export const testRestaurantOpenStatus = async () => {
       console.log(`Business hours for Restaurant ${restaurant.id.toString()}:`);
       restaurant.business_hours.forEach((hour) => {
         console.log(
-          `Day: ${hour.day}, Open: ${hour.open.toISOString()}, Close: ${hour.close.toISOString()}`,
+          `Day: ${hour.day_id}, Open: ${hour.open?.toISOString()}, Close: ${hour.close?.toISOString()}`,
         );
       });
     }
