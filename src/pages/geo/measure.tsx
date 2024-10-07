@@ -9,7 +9,7 @@ import { Style, Circle, Fill, Stroke } from "ol/style";
 import { setupMap } from "@/utils/geo/mapSetup";
 import styled from "styled-components";
 import LineString from "ol/geom/LineString";
-import { getLength } from "ol/sphere";
+import { measureDistance } from "@/utils/geo/geoUtils";
 
 const MapWrapper = styled.div`
   position: relative;
@@ -80,7 +80,7 @@ const Measure: React.FC<MeasureProps> = ({ center }) => {
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = setupMap(
-        "map",
+        document.getElementById("map") as HTMLElement,
         sourceRef,
         markerRef,
         center || [-3.7038, 40.4168] // Madrid
@@ -143,7 +143,7 @@ const Measure: React.FC<MeasureProps> = ({ center }) => {
       );
       sourceRef.current.addFeature(lineFeature);
 
-      const calculatedDistance = getLength(lineString);
+      const calculatedDistance = measureDistance(points[0], points[1]);
       setDistance(calculatedDistance);
     } else {
       setDistance(null);
