@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import MapComponent from "@/components/geo/MapComponent";
 import { Coordinate } from "ol/coordinate";
+import { Area } from "@/types/geo/Area";
 
 interface Address {
   id: string;
@@ -11,7 +12,20 @@ interface Address {
   longitude: string;
 }
 
-const UserAddresses: React.FC = () => {
+type UserAddressesProps = {
+  // add the refresh refs and map refs here that are currently commented out
+  refreshMap: boolean;
+  refreshMarkerRef: React.MutableRefObject<() => void>;
+  refreshMarkerState: boolean;
+  updatePolygonsRef: React.MutableRefObject<(newAreas: Area[]) => void>;
+};
+
+const UserAddresses: React.FC<UserAddressesProps> = ({
+  refreshMap,
+  refreshMarkerRef,
+  refreshMarkerState,
+  updatePolygonsRef,
+}) => {
   const router = useRouter();
   const { userId } = router.query;
 
@@ -180,8 +194,11 @@ const UserAddresses: React.FC = () => {
             mode="marker"
             onMarkerSet={handleMapClick}
             areas={[]}
-            refreshMap={false}
+            refreshMap={refreshMap}
+            refreshMarkerRef={refreshMarkerRef}
+            refreshMarkerState={refreshMarkerState}
             onPolygonDrawn={() => {}}
+            updatePolygonsRef={updatePolygonsRef}
           />
           <button
             type="submit"

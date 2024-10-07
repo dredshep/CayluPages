@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 interface AuthState {
   user: null | {
@@ -12,16 +13,24 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  login: (user) => set({ user, isAuthenticated: true }),
-  logout: () => {
-    // Remove the JWT token from cookies
-    document.cookie =
-      "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
+      login: (user) => set({ user, isAuthenticated: true }),
+      logout: () => {
+        // Remove the JWT token from cookies
+        document.cookie =
+          "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-    // Clear the user state
-    set({ user: null, isAuthenticated: false });
-  },
-}));
+        // Clear the user state
+        set({ user: null, isAuthenticated: false });
+      },
+    }),
+    {
+      name: "auth-storage", // name of the item in the storage (must be unique)
+      storage: createJSONStorage(() => localStorage),
+    },
+  ),
+);

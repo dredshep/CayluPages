@@ -200,7 +200,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
                   register={registerField("dni", {
                     required: "Es obligatorio introducir un DNI o NIE",
                     pattern: {
-                      value: /^[XYZ]?([0-9]{7,8})([A-Z])$/,
+                      value: /^[xyzXYZ]?([0-9]{7,8})([a-zA-Z])$/,
                       message: "El formato del DNI o NIE es incorrecto",
                     },
                   })}

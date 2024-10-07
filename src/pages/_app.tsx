@@ -8,6 +8,8 @@ import api from "@/utils/api";
 import { appWithTranslation } from "next-i18next";
 import AuthWrapper from "@/components/auth/AuthWrapper";
 const noto = Noto_Sans({ subsets: ["latin"] });
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -36,6 +38,7 @@ function App({ Component, pageProps }: AppProps) {
         <Component {...pageProps} />
       </AuthWrapper>
       <Footer />
+      <ToastContainer position="bottom-right" />
     </main>
   );
 }

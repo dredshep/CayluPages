@@ -5,4 +5,5 @@ export interface CustomJwtPayload extends JwtPayload {
   email?: string;
   name?: string;
   email_verified_at?: string | null;
+  isAdmin: boolean;
 }

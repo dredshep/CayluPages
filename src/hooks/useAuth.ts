@@ -1,29 +1,56 @@
-import { useState } from "react";
-import { loginUser, registerUser, recoverPassword } from "../utils/authApi";
+import { useEffect, useState } from "react";
+import { loginUser, recoverPassword, registerUser } from "../utils/authApi";
 import { useAuthStore } from "../store/useAuthStore";
-import { jwtDecode, JwtPayload } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { CustomJwtPayload } from "@/types/auth/CustomJwtPayload";
 
 const useAuth = () => {
   const { user, login: storeLogin, logout: storeLogout } = useAuthStore();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
   const isAuthenticated = !!user;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (user) {
+      // console.log({ user });
+      checkAdminStatus(user.id);
+    } else {
+      setIsAdmin(false);
+      setToken(null);
+    }
+  }, [user]);
+
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}/role`);
+      const data = await response.json();
+      setIsAdmin(data.role === "Admin");
+    } catch (err) {
+      console.error("Error checking admin status:", err);
+      setIsAdmin(false);
+    }
+  };
+
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
       const data = await loginUser(email, password);
-      const { id, name } = data.user;
+      const { token } = data;
+      const id = extractIdFromToken(token);
+      const name = data.user.name;
       storeLogin({
         id: id.toString(),
         email,
         name,
         email_verified_at: data.user.email_verified_at,
       });
+      setToken(token);
+      await checkAdminStatus(id.toString());
       setLoading(false);
       return data;
     } catch (err: any) {
@@ -38,7 +65,7 @@ const useAuth = () => {
     email: string,
     password: string,
     name: string,
-    dni: string
+    dni: string,
   ) => {
     setLoading(true);
     setError(null);
@@ -70,6 +97,7 @@ const useAuth = () => {
   const logout = () => {
     // Call logout API if needed
     storeLogout();
+    setToken(null);
   };
 
   return {
@@ -81,6 +109,8 @@ const useAuth = () => {
     recover,
     loading,
     error,
+    isAdmin,
+    token,
   };
 };
 

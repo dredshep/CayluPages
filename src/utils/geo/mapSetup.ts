@@ -5,12 +5,13 @@ import VectorLayer from "ol/layer/Vector";
 import OSM from "ol/source/OSM";
 import { fromLonLat } from "ol/proj";
 import VectorSource from "ol/source/Vector";
-
+import { Coordinate } from "ol/coordinate";
 export const setupMap = (
-  target: string,
+  target: HTMLElement,
   sourceRef: React.MutableRefObject<VectorSource>,
-  markerRef: React.MutableRefObject<VectorSource>
-): Map => {
+  markerRef: React.MutableRefObject<VectorSource>,
+  center: Coordinate,
+) => {
   return new Map({
     target: target,
     layers: [
@@ -25,7 +26,7 @@ export const setupMap = (
       }),
     ],
     view: new View({
-      center: fromLonLat([-3.7038, 40.4168]), // Madrid, Spain
+      center: fromLonLat(center),
       zoom: 12,
     }),
   });

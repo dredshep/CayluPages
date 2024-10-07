@@ -10,13 +10,76 @@ import { Point } from "ol/geom";
 import { Style, Circle, Fill, Stroke } from "ol/style";
 import { setupMap } from "@/utils/geo/mapSetup";
 import { Area } from "@/types/geo/Area";
+import styled from "styled-components";
+
 export type Mode = "browse" | "draw" | "marker";
+
+const MapWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  .ol-control {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    padding: 2px;
+  }
+
+  .ol-control button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5em;
+    width: 1.5em;
+    background-color: rgba(0, 60, 136, 0.5);
+    color: white;
+    border: none;
+    border-radius: 2px;
+    margin: 1px;
+    font-size: 1.14em;
+  }
+
+  .ol-zoom {
+    top: 0.5em;
+    left: 0.5em;
+  }
+
+  .ol-rotate {
+    top: 0.5em;
+    right: 0.5em;
+  }
+
+  .ol-attribution {
+    right: 0.5em;
+    bottom: 0.5em;
+    max-width: calc(100% - 1.3em);
+  }
+
+  .ol-attribution ul {
+    font-size: 0.7rem;
+    line-height: 1.375em;
+    color: #000;
+    text-shadow: 0 0 2px #fff;
+    max-width: calc(100% - 3.6em);
+  }
+
+  .ol-attribution button {
+    float: right;
+  }
+`;
 interface MapComponentProps {
   mode: Mode;
   onPolygonDrawn: (coordinates: Coordinate[]) => void;
   onMarkerSet: (position: Coordinate, insidePolygon: boolean) => void;
   areas: Area[];
   refreshMap: boolean;
+  refreshMarkerRef: React.MutableRefObject<() => void>;
+  refreshMarkerState: boolean;
+  updatePolygonsRef: React.MutableRefObject<
+    ((newAreas: Area[]) => void) | null
+  >;
+  center?: Coordinate;
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({
@@ -25,6 +88,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
   onMarkerSet,
   areas,
   refreshMap,
+  refreshMarkerState,
+  refreshMarkerRef,
+  updatePolygonsRef,
+  center,
 }) => {
   const mapRef = useRef<Map | null>(null);
   const drawRef = useRef<Draw | null>(null);
@@ -32,14 +99,28 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const markerRef = useRef(new VectorSource());
   const modeRef = useRef(mode);
 
-  useEffect(() => {
-    modeRef.current = mode;
-  }, [mode]);
+  const updatePolygons = (newAreas: Area[]) => {
+    if (sourceRef.current) {
+      sourceRef.current.clear();
+      newAreas.forEach((area) => {
+        const polygon = new Polygon([
+          area.coordinates.map((coord) => fromLonLat(coord)),
+        ]);
+        const feature = new Feature(polygon);
+        sourceRef.current.addFeature(feature);
+      });
+    }
+  };
 
+  // Initialize the map only once when the component mounts
   useEffect(() => {
-    console.log("mode:", mode);
     if (!mapRef.current) {
-      mapRef.current = setupMap("map", sourceRef, markerRef);
+      mapRef.current = setupMap(
+        document.getElementById("map") as HTMLElement,
+        sourceRef,
+        markerRef,
+        center || [-3.7038, 40.4168] // Madrid
+      );
 
       drawRef.current = new Draw({
         source: sourceRef.current,
@@ -53,7 +134,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
         const polygon = feature.getGeometry() as Polygon;
         const rawCoordinates = polygon.getCoordinates()[0];
 
-        // Ensure correct projection for the coordinates
         const coordinates = rawCoordinates.map((coord) =>
           toLonLat(coord)
         ) as Coordinate[];
@@ -70,13 +150,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
       });
 
       mapRef.current.on("singleclick", (event) => {
-        console.log(
-          "Map clicked at",
-          event.coordinate,
-          "mode:",
-          modeRef.current
-        );
-
         if (modeRef.current === "marker") {
           const coordinate = event.coordinate;
           const lonLat = toLonLat(coordinate);
@@ -87,7 +160,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           }
 
           const markerFeature = new Feature(new Point(coordinate));
-          console.log("Marker set at", lonLat);
 
           markerFeature.setStyle(
             new Style({
@@ -104,7 +176,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
           const inside = areas.some((area) => {
             const poly = new Polygon([
-              area.coordinates.map((coord) => fromLonLat(coord)), // Convert back to the map's projection for comparison
+              area.coordinates.map((coord) => fromLonLat(coord)),
             ]);
             return poly.intersectsCoordinate(coordinate);
           });
@@ -112,28 +184,73 @@ const MapComponent: React.FC<MapComponentProps> = ({
           onMarkerSet(lonLat as Coordinate, inside);
         }
       });
-    } else if (refreshMap) {
+    }
+
+    // Cleanup function to run only when the component unmounts
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.setTarget(undefined);
+        mapRef.current = null;
+      }
+    };
+  }, []); // Empty dependency array to ensure this only runs on mount and unmount
+
+  // Handle mode changes separately
+  useEffect(() => {
+    if (drawRef.current) {
+      drawRef.current.setActive(mode === "draw");
+    }
+    modeRef.current = mode;
+  }, [mode]);
+
+  // Refresh polygons when areas or refreshMap changes
+  useEffect(() => {
+    if (refreshMap && sourceRef.current) {
+      // Clear existing polygons
       sourceRef.current.clear();
-      markerRef.current.clear();
+
+      // Add new polygons from areas
       areas.forEach((area) => {
         const polygon = new Polygon([
-          area.coordinates.map((coord) => fromLonLat(coord)), // Convert back to map projection
+          area.coordinates.map((coord) => fromLonLat(coord)),
         ]);
         const feature = new Feature(polygon);
         sourceRef.current.addFeature(feature);
       });
     }
+  }, [areas, refreshMap]);
 
-    if (mapRef.current && drawRef.current) {
-      drawRef.current.setActive(mode === "draw");
+  // Handle refreshMap to clear markers when called
+  useEffect(() => {
+    if (refreshMarkerRef) {
+      refreshMarkerRef.current = () => {
+        if (markerRef.current) {
+          markerRef.current.clear();
+        }
+      };
     }
-  }, [areas, refreshMap, mode, onPolygonDrawn, onMarkerSet]);
+  }, [refreshMarkerRef]);
+
+  // Handle refreshMarkerState to clear markers when it changes
+  useEffect(() => {
+    if (refreshMarkerState && markerRef.current) {
+      markerRef.current.clear();
+    }
+  }, [refreshMarkerState]);
+
+  useEffect(() => {
+    if (updatePolygonsRef) {
+      updatePolygonsRef.current = updatePolygons;
+    }
+  }, [updatePolygonsRef]);
 
   return (
-    <div
-      id="map"
-      className="w-full h-96 rounded-lg shadow-lg bg-gray-800"
-    ></div>
+    <MapWrapper>
+      <div
+        id="map"
+        className="w-full h-96 rounded-lg shadow-lg bg-gray-800"
+      ></div>
+    </MapWrapper>
   );
 };
 
