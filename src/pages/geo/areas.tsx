@@ -4,6 +4,11 @@ import { useAreasApi } from "@/hooks/geo/useAreasApi";
 import AreaModal from "@/components/geo/AreaModal";
 import { ApiArea, Area } from "@/types/geo/Area";
 import apiAreaToArea from "@/utils/geo/apiAreaToArea";
+import AreasDashboard from "@/components/geo/AreasDashboard";
+import AreasMap from "@/components/geo/AreasMap";
+import MeasuringTool from "@/components/geo/MeasuringTool";
+import PointInPolygonTool from "@/components/geo/PointInPolygonTool";
+import AddressSearch from "@/components/geo/AddressSearch";
 
 const AreasPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,6 +50,7 @@ const AreasPage: React.FC = () => {
         });
       }
       setIsModalOpen(false);
+      fetchAreas();
     } catch (err: any) {
       setError(err.message);
     }
@@ -54,6 +60,19 @@ const AreasPage: React.FC = () => {
     try {
       await deleteArea(id);
       setIsModalOpen(false);
+      fetchAreas();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleAreaAdded = async (newArea: Area) => {
+    try {
+      await createArea({
+        name: "New Area",
+        polygon: newArea.coordinates.flatMap((coord) => coord).join(","),
+      });
+      fetchAreas();
     } catch (err: any) {
       setError(err.message);
     }
@@ -63,64 +82,32 @@ const AreasPage: React.FC = () => {
     <div className="min-h-screen bg-gray-100">
       <AppNavbar />
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Areas</h1>
-          <button
-            onClick={fetchAreas}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
-          >
-            Refresh Areas
-          </button>
-          <button
-            onClick={handleAddNewArea}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add New Area
-          </button>
-        </div>
-        {loading ? (
-          <p className="text-lg text-gray-700">Loading areas...</p>
-        ) : apiError ? (
-          <p className="text-lg text-red-600">{apiError.toString()}</p>
-        ) : (
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+          Areas Dashboard
+        </h1>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {apiAreas.map((area) => (
-                  <tr key={area.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {area.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {area.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => handleEditArea(area)}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <AreasDashboard
+              areas={apiAreas}
+              loading={loading}
+              error={apiError as Error | null}
+              onEditArea={handleEditArea}
+              onAddNewArea={handleAddNewArea}
+              onRefreshAreas={fetchAreas}
+            />
           </div>
-        )}
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+            <AreasMap
+              areas={apiAreas.map(apiAreaToArea)}
+              onAreaAdded={handleAreaAdded}
+            />
+          </div>
+        </div>
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <MeasuringTool />
+          <PointInPolygonTool areas={apiAreas.map(apiAreaToArea)} />
+          <AddressSearch />
+        </div>
       </div>
       <AreaModal
         isOpen={isModalOpen}

@@ -1,7 +1,7 @@
 import React from "react";
 import { Coordinate } from "ol/coordinate";
 import { Polygon } from "ol/geom";
-import { fromLonLat, toLonLat } from "ol/proj";
+import { fromLonLat } from "ol/proj";
 import { toast } from "react-toastify";
 
 interface PolygonTableProps {
@@ -19,15 +19,10 @@ const PolygonTable: React.FC<PolygonTableProps> = ({
     point: Coordinate,
     polygonCoordinates: Coordinate[]
   ) => {
-    // Convert point to map projection if necessary
     const pointInMapProjection = fromLonLat(point);
-
-    // Create a polygon in map projection
     const polygon = new Polygon([
       polygonCoordinates.map((coord) => fromLonLat(coord)),
     ]);
-
-    // Perform the intersection check
     return polygon.intersectsCoordinate(pointInMapProjection);
   };
 
@@ -43,55 +38,48 @@ const PolygonTable: React.FC<PolygonTableProps> = ({
   };
 
   return (
-    <div className="mt-4">
-      <h3 className="text-gray-200">Polygon Status Table</h3>
-      <table className="min-w-full mt-2 text-gray-200">
-        <thead>
+    <div className="overflow-x-auto mt-4">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
           <tr>
-            <th className="px-4 py-2">Polygon ID</th>
-            <th className="px-4 py-2">Coordinates</th>
-            <th className="px-4 py-2">Status</th>
-            <th className="px-4 py-2">Actions</th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              ID
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="bg-white divide-y divide-gray-200">
           {polygons.map((polygon) => (
             <tr key={polygon.id}>
-              <td className="border px-4 py-2">{polygon.id}</td>
-              <td className="border px-4 py-2">
-                {polygon.coordinates.map((coord, index) => {
-                  const lonLat = coord; // Coordinates already in lon/lat
-                  return (
-                    <div key={index}>
-                      [{lonLat[0].toFixed(6)}, {lonLat[1].toFixed(6)}]
-                    </div>
-                  );
-                })}
+              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                {polygon.id}
               </td>
-              <td className="border px-4 py-2">
+              <td className="px-3 py-2 whitespace-nowrap text-sm">
                 {markerPosition &&
                 isPointInPolygon(markerPosition, polygon.coordinates) ? (
-                  <span className="text-green-400">Inside</span>
+                  <span className="text-green-600">Inside</span>
                 ) : (
-                  <span className="text-red-400">Outside</span>
+                  <span className="text-red-600">Outside</span>
                 )}
               </td>
-              <td className="border px-4 py-2">
-                <div className="flex flex-col gap-2">
-                  <button
-                    className="text-red-400 hover:text-red-600"
-                    onClick={() => onRemovePolygon(polygon.id)}
-                  >
-                    Remove
-                  </button>
-                  {/* copy polygon coordinates to clipboard */}
-                  <button
-                    className="text-blue-400 hover:text-blue-600"
-                    onClick={() => copyPolygonCoordinates(polygon)}
-                  >
-                    Copy Coordinates
-                  </button>
-                </div>
+              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                <button
+                  className="text-red-600 hover:text-red-900 mr-2"
+                  onClick={() => onRemovePolygon(polygon.id)}
+                >
+                  Remove
+                </button>
+                <button
+                  className="text-blue-600 hover:text-blue-900"
+                  onClick={() => copyPolygonCoordinates(polygon)}
+                >
+                  Copy
+                </button>
               </td>
             </tr>
           ))}

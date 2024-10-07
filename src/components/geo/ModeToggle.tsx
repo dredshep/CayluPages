@@ -1,5 +1,6 @@
 import React from "react";
 import { Mode } from "@/components/geo/MapComponent";
+
 interface ModeToggleProps {
   currentMode: Mode;
   setMode: (mode: Mode) => void;
@@ -7,36 +8,36 @@ interface ModeToggleProps {
 
 const ModeToggle: React.FC<ModeToggleProps> = ({ currentMode, setMode }) => {
   return (
-    <div className="flex space-x-4 mt-4">
+    <div className="flex space-x-2">
       <button
         onClick={() => setMode("browse")}
-        className={`px-4 py-2 rounded-md ${
+        className={`px-3 py-1 text-sm rounded-md transition-colors ${
           currentMode === "browse"
-            ? "bg-gray-600 text-white"
-            : "bg-gray-400 text-gray-800"
+            ? "bg-blue-600 text-white"
+            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
         }`}
       >
         Browse
       </button>
       <button
         onClick={() => setMode("draw")}
-        className={`px-4 py-2 rounded-md ${
+        className={`px-3 py-1 text-sm rounded-md transition-colors ${
           currentMode === "draw"
             ? "bg-blue-600 text-white"
-            : "bg-gray-400 text-gray-800"
+            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
         }`}
       >
-        Draw Polygon
+        Draw
       </button>
       <button
         onClick={() => setMode("marker")}
-        className={`px-4 py-2 rounded-md ${
+        className={`px-3 py-1 text-sm rounded-md transition-colors ${
           currentMode === "marker"
-            ? "bg-green-600 text-white"
-            : "bg-gray-400 text-gray-800"
+            ? "bg-blue-600 text-white"
+            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
         }`}
       >
-        Place Marker
+        Marker
       </button>
     </div>
   );

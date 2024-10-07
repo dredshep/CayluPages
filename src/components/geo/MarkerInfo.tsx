@@ -21,15 +21,10 @@ const MarkerInfo: React.FC<MarkerInfoProps> = ({
     point: Coordinate,
     polygonCoordinates: Coordinate[]
   ): boolean => {
-    // Convert point to map projection if necessary
     const pointInMapProjection = fromLonLat(point);
-
-    // Create a polygon in map projection
     const polygon = new OlPolygon([
       polygonCoordinates.map((coord) => fromLonLat(coord)),
     ]);
-
-    // Perform the intersection check
     return polygon.intersectsCoordinate(pointInMapProjection);
   };
 
@@ -40,14 +35,23 @@ const MarkerInfo: React.FC<MarkerInfoProps> = ({
     );
 
   return (
-    (markerPosition ?? undefined) && (
-      <div className="mt-4 text-gray-200">
-        Marker Position: {JSON.stringify(markerPosition)} -{" "}
-        {markerInside ? (
-          <span className="text-green-400">Inside a Polygon</span>
-        ) : (
-          <span className="text-red-400">Outside Polygon</span>
-        )}
+    markerPosition && (
+      <div className="mt-4 p-4 bg-gray-100 rounded-md">
+        <h3 className="text-lg font-semibold mb-2">Marker Information</h3>
+        <p className="text-sm">
+          Position: [{markerPosition[0].toFixed(6)},{" "}
+          {markerPosition[1].toFixed(6)}]
+        </p>
+        <p className="text-sm mt-1">
+          Status:{" "}
+          {markerInside ? (
+            <span className="text-green-600 font-semibold">
+              Inside a Polygon
+            </span>
+          ) : (
+            <span className="text-red-600 font-semibold">Outside Polygons</span>
+          )}
+        </p>
       </div>
     )
   );
