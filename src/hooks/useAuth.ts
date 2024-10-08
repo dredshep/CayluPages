@@ -40,17 +40,14 @@ const useAuth = () => {
     setError(null);
     try {
       const data = await loginUser(email, password);
-      const { token } = data;
-      const id = extractIdFromToken(token);
-      const name = data.user.name;
-      storeLogin({
-        id: id.toString(),
-        email,
-        name,
-        email_verified_at: data.user.email_verified_at,
-      });
-      setToken(token);
-      await checkAdminStatus(id.toString());
+      const { token, user } = data;
+      useAuthStore.getState().login(
+        {
+          ...user,
+          id: user.id.toString(),
+        },
+        token
+      );
       setLoading(false);
       return data;
     } catch (err: any) {
@@ -65,7 +62,7 @@ const useAuth = () => {
     email: string,
     password: string,
     name: string,
-    dni: string,
+    dni: string
   ) => {
     setLoading(true);
     setError(null);

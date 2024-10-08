@@ -76,12 +76,15 @@ export default function LoginModal({ onClose }: LoginModalProps) {
         const response = await login(emailLowerCase, data.password);
         if (response.token) {
           document.cookie = `auth_token=${response.token}; path=/; secure; samesite=strict`;
-          storeLogin({
-            id: response.user.id.toString(),
-            email: response.user.email,
-            name: response.user.name,
-            email_verified_at: response.user.email_verified_at,
-          });
+          storeLogin(
+            {
+              id: response.user.id.toString(),
+              email: response.user.email,
+              name: response.user.name,
+              email_verified_at: response.user.email_verified_at,
+            },
+            response.token
+          );
           closeModal(); // Use the new closeModal function
         }
       } else if (activeTab === "recovery") {

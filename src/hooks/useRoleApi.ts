@@ -25,7 +25,7 @@ const useRoleApi = (requiredRole: string) => {
     async <T>(
       method: ApiMethod,
       url: string,
-      data: any = null,
+      data: any = null
     ): Promise<T | null> => {
       if (!internalUser) {
         setError(new AxiosError("User not authenticated"));
@@ -41,11 +41,16 @@ const useRoleApi = (requiredRole: string) => {
       setError(null);
 
       try {
-        const response = await apiRequest<T>(method, url, data, {
-          Authorization: `Bearer ${internalToken}`,
-        });
-        setLoading(false);
-        return response;
+        if (internalToken) {
+          const response = await apiRequest<T>(method, url, data, {
+            Authorization: `Bearer ${internalToken}`,
+          });
+          setLoading(false);
+          return response;
+        } else {
+          setError(new AxiosError("User not authenticated"));
+          return null;
+        }
       } catch (err) {
         const axiosError = err as AxiosError;
         setError(axiosError);
@@ -53,7 +58,7 @@ const useRoleApi = (requiredRole: string) => {
         return null;
       }
     },
-    [apiRequest, internalUser, internalIsAdmin, internalToken, requiredRole],
+    [apiRequest, internalUser, internalIsAdmin, internalToken, requiredRole]
   );
 
   return { loading, error, request };

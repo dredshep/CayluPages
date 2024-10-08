@@ -52,6 +52,7 @@
     "react-leaflet": "^4.2.1",
     "react-openlayers": "^0.3.0",
     "react-toastify": "^10.0.5",
+    "sharp": "^0.33.5",
     "styled-components": "^6.1.11",
     "zustand": "^4.5.4"
   },

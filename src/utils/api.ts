@@ -24,14 +24,17 @@ const debouncedRefresh = debounce(
         if (response.data.token) {
           const payload = jwtDecode<CustomJwtPayload>(response.data.token);
           const id = payload.id || "";
-          useAuthStore.getState().login({
-            id,
-            email: payload.email || "",
-            name: payload.name || "",
-            email_verified_at: payload.email_verified_at
-              ? new Date(payload.email_verified_at)
-              : null,
-          });
+          useAuthStore.getState().login(
+            {
+              id,
+              email: payload.email || "",
+              name: payload.name || "",
+              email_verified_at: payload.email_verified_at
+                ? new Date(payload.email_verified_at)
+                : null,
+            },
+            response.data.token
+          );
         }
       })
       .catch((error) => {

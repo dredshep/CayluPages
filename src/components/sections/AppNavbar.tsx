@@ -24,10 +24,10 @@ export default function AppNavbar() {
     useState<number>(0);
 
   useEffect(() => {
-    console.log({
-      serverSide: cartProductCount,
-      browserSide: browserSideCartProductCount,
-    });
+    // console.log({
+    //   serverSide: cartProductCount,
+    //   browserSide: browserSideCartProductCount,
+    // });
     setBrowserSideCartProductCount(cartProductCount ?? 0);
   }, [cartProductCount, browserSideCartProductCount]);
   const handleCartClick = () => {

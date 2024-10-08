@@ -22,6 +22,9 @@ const nextConfig = {
     defaultLocale: "default",
     localeDetection: false,
   },
+  compiler: {
+    styledComponents: true,
+  },
 };
 
 module.exports = nextConfig;

@@ -17,12 +17,15 @@ function App({ Component, pageProps }: AppProps) {
       try {
         const response = await api.get("/auth/me");
         if (response.data.user) {
-          useAuthStore.getState().login({
-            id: response.data.user.id,
-            email: response.data.user.email,
-            name: response.data.user.name,
-            email_verified_at: response.data.user.email_verified_at,
-          });
+          useAuthStore.getState().login(
+            {
+              id: response.data.user.id,
+              email: response.data.user.email,
+              name: response.data.user.name,
+              email_verified_at: response.data.user.email_verified_at,
+            },
+            response.data.token
+          );
         }
       } catch (error) {
         console.error("Failed to initialize auth:", error);

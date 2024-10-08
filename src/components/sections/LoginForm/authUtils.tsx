@@ -1,4 +1,6 @@
 // authUtils.ts
+import { useAuthStore, User } from "@/store/useAuthStore";
+
 export async function handleLogin(
   email: string,
   password: string,
@@ -13,13 +15,15 @@ export async function handleLogin(
     });
 
     if (response.ok) {
+      const data: { user: User; token: string } = await response.json();
+      useAuthStore.getState().login(data.user, data.token);
       onSuccess();
     } else {
       const errorData = await response.json();
-      setError(errorData.error || "Login failed.");
+      setError(errorData.error || "Login failed");
     }
   } catch (error) {
-    setError("An error occurred during login.");
+    setError("An error occurred during login");
   }
 }
 

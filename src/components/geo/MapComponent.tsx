@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Map from "ol/Map";
 import Draw from "ol/interaction/Draw";
 import VectorSource from "ol/source/Vector";
@@ -10,64 +10,10 @@ import { Point } from "ol/geom";
 import { Style, Circle, Fill, Stroke } from "ol/style";
 import { setupMap } from "@/utils/geo/mapSetup";
 import { Area } from "@/types/geo/Area";
-import styled from "styled-components";
+import { MapWrapper } from "./styled/MapWrapper";
 
 export type Mode = "browse" | "draw" | "marker";
 
-const MapWrapper = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-
-  .ol-control {
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.4);
-    border-radius: 4px;
-    padding: 2px;
-  }
-
-  .ol-control button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 1.5em;
-    width: 1.5em;
-    background-color: rgba(0, 60, 136, 0.5);
-    color: white;
-    border: none;
-    border-radius: 2px;
-    margin: 1px;
-    font-size: 1.14em;
-  }
-
-  .ol-zoom {
-    top: 0.5em;
-    left: 0.5em;
-  }
-
-  .ol-rotate {
-    top: 0.5em;
-    right: 0.5em;
-  }
-
-  .ol-attribution {
-    right: 0.5em;
-    bottom: 0.5em;
-    max-width: calc(100% - 1.3em);
-  }
-
-  .ol-attribution ul {
-    font-size: 0.7rem;
-    line-height: 1.375em;
-    color: #000;
-    text-shadow: 0 0 2px #fff;
-    max-width: calc(100% - 3.6em);
-  }
-
-  .ol-attribution button {
-    float: right;
-  }
-`;
 interface MapComponentProps {
   mode: Mode;
   onPolygonDrawn: (coordinates: Coordinate[]) => void;
@@ -98,7 +44,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const sourceRef = useRef(new VectorSource());
   const markerRef = useRef(new VectorSource());
   const modeRef = useRef(mode);
-
+  const [refresh, setRefresh] = useState<"true" | "false">("false");
+  const [mapKey, setMapKey] = useState(0);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const updatePolygons = (newAreas: Area[]) => {
     if (sourceRef.current) {
       sourceRef.current.clear();
@@ -195,6 +143,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
     };
   }, []); // Empty dependency array to ensure this only runs on mount and unmount
 
+  // Add this new useEffect hook for styled-components refresh
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setRefresh("true");
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Handle mode changes separately
   useEffect(() => {
     if (drawRef.current) {
@@ -244,8 +201,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [updatePolygonsRef]);
 
+  useEffect(() => {
+    // console.log("refresh", refresh);
+  }, [refresh]);
+
   return (
-    <MapWrapper>
+    <MapWrapper refresh={refresh === "true" ? "true" : undefined}>
       <div
         id="map"
         className="w-full h-96 rounded-lg shadow-lg bg-gray-800"
