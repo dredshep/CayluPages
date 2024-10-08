@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import Link from "next/link";
+import { Dialog, Transition } from "@headlessui/react";
 import HamburgerIcon from "@components/icons/navbar/HamburgerIcon";
 import LocationIcon from "@components/icons/navbar/LocationIcon";
 import MagnifyingGlassIcon from "@components/icons/navbar/MagnifyingGlassIcon";
@@ -9,6 +10,8 @@ import { useCartStore2 } from "@/store/useCartStore2";
 import useAuth from "@/hooks/useAuth";
 import LoginModal from "@components/sections/LoginForm/LoginModal";
 import { useLoginModalStore } from "@/store/useLoginModalStore";
+import { useUserStore } from "@/store/useUserStore";
+import UserAddressModal from "@components/sections/UserAddressModal";
 
 export default function AppNavbar() {
   const [isPopoverVisible, setPopoverVisible] = useState(false);
@@ -19,23 +22,38 @@ export default function AppNavbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const { openModal } = useLoginModalStore();
+  const { address, fetchAddress } = useUserStore();
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
   const [browserSideCartProductCount, setBrowserSideCartProductCount] =
     useState<number>(0);
 
   useEffect(() => {
-    // console.log({
-    //   serverSide: cartProductCount,
-    //   browserSide: browserSideCartProductCount,
-    // });
     setBrowserSideCartProductCount(cartProductCount ?? 0);
-  }, [cartProductCount, browserSideCartProductCount]);
+    if (isAuthenticated) {
+      fetchAddress();
+    }
+  }, [
+    cartProductCount,
+    browserSideCartProductCount,
+    isAuthenticated,
+    fetchAddress,
+  ]);
+
   const handleCartClick = () => {
     setPopoverVisible((prev) => !prev);
   };
 
   const handleClosePopover = () => {
     setPopoverVisible(false);
+  };
+
+  const handleOpenAddressModal = () => {
+    setIsAddressModalOpen(true);
+  };
+
+  const handleCloseAddressModal = () => {
+    setIsAddressModalOpen(false);
   };
 
   return (
@@ -79,7 +97,12 @@ export default function AppNavbar() {
       {/* Sign up and Sign in */}
       {isAuthenticated ? (
         <div className="flex items-center gap-4">
-          <span>Welcome, {user?.name || user?.email}</span>
+          <button
+            onClick={handleOpenAddressModal}
+            className="text-black hover:underline"
+          >
+            Welcome, {user?.name || user?.email}
+          </button>
           <button
             onClick={logout}
             className="text-black bg-teal-400 rounded-full px-[26px] py-[13px] select-none hover:opacity-70 transition-all duration-100 cursor-pointer"
@@ -101,6 +124,10 @@ export default function AppNavbar() {
         </>
       )}
       <LoginModal onClose={() => {}} />
+      <UserAddressModal
+        isOpen={isAddressModalOpen}
+        onClose={handleCloseAddressModal}
+      />
     </div>
   );
 }
