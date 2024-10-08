@@ -22,7 +22,7 @@ export default function AppNavbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const { openModal } = useLoginModalStore();
-  const { address, fetchAddress } = useUserStore();
+
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
   const [browserSideCartProductCount, setBrowserSideCartProductCount] =
@@ -30,15 +30,7 @@ export default function AppNavbar() {
 
   useEffect(() => {
     setBrowserSideCartProductCount(cartProductCount ?? 0);
-    if (isAuthenticated) {
-      fetchAddress();
-    }
-  }, [
-    cartProductCount,
-    browserSideCartProductCount,
-    isAuthenticated,
-    fetchAddress,
-  ]);
+  }, [cartProductCount, browserSideCartProductCount, isAuthenticated]);
 
   const handleCartClick = () => {
     setPopoverVisible((prev) => !prev);

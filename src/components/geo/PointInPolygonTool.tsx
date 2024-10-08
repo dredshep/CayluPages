@@ -1,28 +1,32 @@
 import React, { useState } from "react";
-import { findPolygonContainingPoint } from "@/utils/geo/geoUtils";
-import { Coordinate } from "ol/coordinate";
-import { Area } from "@/types/geo/Area";
+import axios from "axios";
 
-interface PointInPolygonToolProps {
-  areas: Area[];
-}
-
-const PointInPolygonTool: React.FC<PointInPolygonToolProps> = ({ areas }) => {
+const PointInPolygonTool: React.FC = () => {
   const [point, setPoint] = useState<string>("");
   const [result, setResult] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleCheck = () => {
+  const handleCheck = async () => {
+    setIsLoading(true);
     try {
-      const coord = JSON.parse(point) as Coordinate;
-      const polygonId = findPolygonContainingPoint(coord, areas);
-      setResult(
-        polygonId
-          ? `Point is inside polygon ${polygonId}`
-          : "Point is not inside any polygon"
+      const coord = JSON.parse(point) as [number, number];
+      const response = await axios.post(
+        "/api/geo/point-in-polygon",
+        { point: coord },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you store the JWT token in localStorage
+          },
+        }
       );
+
+      const { areaId, message } = response.data;
+      setResult(areaId ? `Point is inside area ${areaId}` : message);
     } catch (error) {
-      console.error("Invalid coordinate", error);
-      setResult("Invalid coordinate");
+      console.error("Error checking point:", error);
+      setResult("Error checking point");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -39,9 +43,10 @@ const PointInPolygonTool: React.FC<PointInPolygonToolProps> = ({ areas }) => {
         />
         <button
           onClick={handleCheck}
-          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
+          disabled={isLoading}
+          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 disabled:bg-green-300"
         >
-          Check Point
+          {isLoading ? "Checking..." : "Check Point"}
         </button>
         {result && <p className="text-center">{result}</p>}
       </div>

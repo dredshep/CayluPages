@@ -6,8 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "npx prisma generate"
+    "lint": "DOTENV_CONFIG_PATH=./.env.local next lint",
+    "postinstall": "DOTENV_CONFIG_PATH=./.env.local npx prisma generate",
+    "pullgen": "DOTENV_CONFIG_PATH=./.env.local npx prisma db pull && npx prisma generate"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",
