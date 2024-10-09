@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "DOTENV_CONFIG_PATH=./.env.local next lint",
     "postinstall": "DOTENV_CONFIG_PATH=./.env.local npx prisma generate",
-    "pullgen": "DOTENV_CONFIG_PATH=./.env.local npx prisma db pull && npx prisma generate"
+    "pullgen": "DOTENV_CONFIG_PATH=./.env.local npx prisma db pull && DOTENV_CONFIG_PATH=./.env.local npx prisma generate"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",
@@ -56,7 +56,7 @@
     "react-toastify": "^10.0.5",
     "sharp": "^0.33.5",
     "styled-components": "^6.1.11",
-    "zustand": "^4.5.4"
+    "zustand": "^5.0.0-rc.2"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -41,12 +41,12 @@ const useAuth = () => {
     try {
       const data = await loginUser(email, password);
       const { token, user } = data;
-      useAuthStore.getState().login(
+      storeLogin(
         {
           ...user,
           id: user.id.toString(),
         },
-        token
+        token,
       );
       setLoading(false);
       return data;
@@ -62,7 +62,7 @@ const useAuth = () => {
     email: string,
     password: string,
     name: string,
-    dni: string
+    dni: string,
   ) => {
     setLoading(true);
     setError(null);

@@ -1,6 +1,7 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import api from "@/utils/api";
+import { useAuthStore } from "./useAuthStore";
 
 interface UserAddress {
   id: number;
@@ -29,6 +30,12 @@ export const useUserStore = create<UserState>()(
       setSelectedAddressId: (id) => set({ selectedAddressId: id }),
       fetchAddresses: async () => {
         try {
+          // check if user is authenticated
+          const { token } = useAuthStore.getState();
+          if (!token) {
+            throw new Error("User is not authenticated");
+          }
+
           const response = await api.get("/user/address");
           set({ addresses: response.data });
         } catch (error) {
@@ -63,8 +70,9 @@ export const useUserStore = create<UserState>()(
           await api.delete(`/user/address`, { data: { id } });
           set((state) => ({
             addresses: state.addresses.filter((a) => a.id !== id),
-            selectedAddressId:
-              state.selectedAddressId === id ? null : state.selectedAddressId,
+            selectedAddressId: state.selectedAddressId === id
+              ? null
+              : state.selectedAddressId,
           }));
         } catch (error) {
           console.error("Error deleting user address:", error);
@@ -74,7 +82,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: "user-storage",
-      getStorage: () => localStorage,
-    }
-  )
+      storage: createJSONStorage(() => localStorage),
+    },
+  ),
 );

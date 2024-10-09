@@ -105,7 +105,7 @@ const AreasPage: React.FC = () => {
         </div>
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           <MeasuringTool />
-          <PointInPolygonTool areas={apiAreas.map(apiAreaToArea)} />
+          <PointInPolygonTool />
           <AddressSearch />
         </div>
       </div>

@@ -3,13 +3,23 @@ import api from "./api";
 import { LoginResponse } from "@/pages/api/auth/login";
 export const loginUser = async (
   email: string,
-  password: string
+  password: string,
 ): Promise<LoginResponse> => {
   try {
     const response = await api.post<LoginResponse>("/auth/login", {
       email,
       password,
     });
+
+    // Check if forcelogin parameter is present in the URL
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("forcelogin")) {
+      // Remove the forcelogin parameter
+      url.searchParams.delete("forcelogin");
+      // Update the URL without reloading the page
+      window.history.replaceState({}, "", url.toString());
+    }
+
     return response.data;
   } catch (error: any) {
     console.error("Login error:", error);
@@ -34,7 +44,7 @@ export const registerUser = async (
   email: string,
   password: string,
   name: string,
-  dni: string
+  dni: string,
 ) => {
   try {
     const response = await api.post("/auth/register", {

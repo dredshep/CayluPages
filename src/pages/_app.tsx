@@ -12,27 +12,32 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App({ Component, pageProps }: AppProps) {
+  const { token } = useAuthStore();
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const response = await api.get("/auth/me");
-        if (response.data.user) {
-          useAuthStore.getState().login(
-            {
-              id: response.data.user.id,
-              email: response.data.user.email,
-              name: response.data.user.name,
-              email_verified_at: response.data.user.email_verified_at,
-            },
-            response.data.token
-          );
+    if (token) {
+      const initializeAuth = async () => {
+        try {
+          const response = await api.get("/auth/me");
+          if (response.data.user) {
+            useAuthStore.getState().login(
+              {
+                id: response.data.user.id,
+                email: response.data.user.email,
+                name: response.data.user.name,
+                email_verified_at: response.data.user.email_verified_at,
+              },
+              response.data.token
+            );
+          }
+        } catch (error) {
+          console.error("Failed to initialize auth:", error);
         }
-      } catch (error) {
-        console.error("Failed to initialize auth:", error);
-      }
-    };
+      };
 
-    initializeAuth();
+      initializeAuth();
+    } else {
+      useAuthStore.getState().logout();
+    }
   }, []);
 
   return (

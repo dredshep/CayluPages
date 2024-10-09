@@ -1,20 +1,20 @@
 // Path: src/pages/api/companies/[id].ts
 import { NextApiRequest, NextApiResponse } from "next";
 import {
-  PrismaClient,
-  companies,
   additionals,
-  category_products,
-  products,
   business_hours,
+  catalogue_sorts,
+  category_products,
   cities,
+  companies,
   company_holidays,
   geolocations,
   offers,
+  order_items,
   order_purchases,
   orders,
-  catalogue_sorts,
-  order_items,
+  PrismaClient,
+  products,
   products_status,
   states,
   warehouses,
@@ -84,10 +84,8 @@ const getCompany = (companyId: number) =>
 
 // Utility type to convert bigint and Decimal to number
 type ConvertBigIntToNumber<T> = {
-  [K in keyof T]: T[K] extends bigint
-    ? number
-    : T[K] extends Decimal
-    ? Decimal
+  [K in keyof T]: T[K] extends bigint ? number
+    : T[K] extends Decimal ? Decimal
     : T[K];
 };
 
@@ -150,14 +148,14 @@ export type ApiCategoryProducts = ConvertBigIntToNumber<category_products> & {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   try {
     const _companyId = req.query;
     const companyId = parseInt(_companyId.id as string);
     const companies = await getCompany(companyId);
     const response = JSONbig.parse(
-      JSONbig.stringify(companies[0])
+      JSONbig.stringify(companies[0]),
     ) as ApiCompany;
     res.status(200).json(response);
   } catch (error: any) {

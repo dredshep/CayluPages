@@ -28,7 +28,7 @@ const verifyToken = (token: string | undefined): number => {
   }
   const decoded = jwt.verify(
     token,
-    process.env.JWT_SECRET || "your_jwt_secret1233"
+    process.env.JWT_SECRET || "your_jwt_secret1233",
   ) as CustomJwtPayload;
   return parseInt(decoded.id as string, 10);
 };
@@ -43,7 +43,7 @@ const createAddress = async (
   userId: number,
   address: string,
   lat: Decimal,
-  lng: Decimal
+  lng: Decimal,
 ) => {
   if (!lat || !lng) {
     throw new Error("Latitude and longitude are required");
@@ -58,7 +58,7 @@ const updateAddress = async (
   id: number,
   address: string,
   lat: Decimal,
-  lng: Decimal
+  lng: Decimal,
 ) => {
   if (!id) {
     throw new Error("Address ID is required for updates");
@@ -93,10 +93,17 @@ const deleteAddress = async (userId: number, id: number) => {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   try {
-    const userId = verifyToken(req.cookies.auth_token);
+    const token = req.cookies.auth_token;
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+    const userId = verifyToken(token);
+    if (!userId) {
+      return res.status(401).json({ error: "No token provided" });
+    }
 
     const onGET = async () => {
       const addresses = await getAddresses(userId);
@@ -105,7 +112,7 @@ export default async function handler(
           ...address,
           user_id: Number(address.user_id),
           id: Number(address.id),
-        }))
+        })),
       );
     };
 

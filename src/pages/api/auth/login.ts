@@ -18,7 +18,7 @@ export interface LoginResponse {
 }
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method === "POST") {
     const { email, password } = req.body;
@@ -58,7 +58,7 @@ export default async function handler(
           email_verified_at: user.email_verified_at,
         },
         process.env.JWT_SECRET || "your_jwt_secret1233",
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       // Send the token and user data

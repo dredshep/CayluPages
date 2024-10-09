@@ -1,12 +1,11 @@
 import styled from "styled-components";
 import RestaurantCard from "@components/cards/RestaurantCard";
 import Link from "next/link";
-import useFetch from "@/components/meta/hooks/useFetch";
-import { JoinedCompany } from "@/types/JoinedCompany";
 import { useEffect, useState } from "react";
 import { useCompanyStore } from "@/store/company/useCompanyStore";
 import moment from "moment";
 import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
+import { ApiCompany } from "@/pages/api/companies/[id]";
 
 const gridWidth = 492;
 const gapY = 56;
@@ -96,19 +95,41 @@ const Td = styled.td`
 `;
 
 const RestaurantGrid = () => {
-  const comps = useFetch<JoinedCompany[]>("/api/companies");
-  const { companies, availableCompanies, fetchCompanies, updateAvailability } =
+  const { companies, fetchCompanies, availableCompanies, updateAvailability } =
     useCompanyStore();
-  const [ready, setReady] = useState(true);
-  const [selectedCompany, setSelectedCompany] = useState<JoinedCompany | null>(
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedCompany, setSelectedCompany] = useState<ApiCompany | null>(
     null
   );
 
   useEffect(() => {
-    if (comps && comps.length > 0) {
-      fetchCompanies();
+    console.log(
+      "RestaurantGrid: useEffect called, companies length:",
+      companies.length
+    );
+
+    const fetchData = async () => {
+      console.log("RestaurantGrid: fetchData called");
+      try {
+        await fetchCompanies();
+        console.log("RestaurantGrid: fetchCompanies completed");
+      } catch (error) {
+        console.error("RestaurantGrid: Error in fetchCompanies", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (companies.length === 0) {
+      console.log("RestaurantGrid: No companies, calling fetchData");
+      fetchData();
+    } else {
+      console.log("RestaurantGrid: Companies already loaded");
+      setIsLoading(false);
     }
-  }, [comps, fetchCompanies]);
+  }, [companies.length, fetchCompanies]);
+
+  console.log("RestaurantGrid: Rendering, isLoading:", isLoading);
 
   const isCompanyAvailable = (companyId: number) => {
     console.log("@/components/sections/restaurants/RestaurantGrid.tsx:114", {
@@ -119,7 +140,7 @@ const RestaurantGrid = () => {
     );
   };
 
-  const openScheduleModal = (company: JoinedCompany) => {
+  const openScheduleModal = (company: ApiCompany) => {
     setSelectedCompany(company);
   };
 
@@ -127,10 +148,21 @@ const RestaurantGrid = () => {
     setSelectedCompany(null);
   };
 
-  return ready && Array.isArray(comps) ? (
+  const handleUpdateAvailability = async () => {
+    await updateAvailability();
+    console.log(
+      "RestaurantGrid: Availability updated",
+      availableCompanies.length + " companies available"
+    );
+  };
+
+  return isLoading ? (
+    <div>Loading...</div>
+  ) : (
     <GridContainer>
+      <button onClick={handleUpdateAvailability}>Update Availability</button>
       <Grid>
-        {comps.map((data, index) => (
+        {companies.map((data, index) => (
           <div key={index} style={{ position: "relative" }}>
             {isCompanyAvailable(Number(data.id)) ? (
               <Link href={`/restaurantes/${data.id}`}>
@@ -226,8 +258,6 @@ const RestaurantGrid = () => {
         </Modal>
       )}
     </GridContainer>
-  ) : (
-    <div>Loading...</div>
   );
 };
 

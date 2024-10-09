@@ -7,11 +7,11 @@ const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method === "POST") {
     const oldToken = req.cookies.auth_token;
-
+    console.log({ oldToken });
     if (!oldToken) {
       return res.status(401).json({ error: "No token provided" });
     }
@@ -59,7 +59,7 @@ export default async function handler(
           email_verified_at: user.email_verified_at,
         },
         process.env.JWT_SECRET || "your_jwt_secret1233",
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       // Return the new token in the response
