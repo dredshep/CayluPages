@@ -23,6 +23,7 @@
     "@types/json-bigint": "^1.0.4",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/lodash": "^4.17.9",
+    "@types/node-geocoder": "^4.2.6",
     "@types/nodemailer": "^6.4.16",
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
@@ -43,6 +44,7 @@
     "moment": "^2.30.1",
     "next": "^14.2.5",
     "next-i18next": "^15.3.1",
+    "node-geocoder": "^4.4.0",
     "nodemailer": "^6.9.15",
     "npm": "^10.8.2",
     "ol": "^10.2.1",
@@ -56,7 +58,7 @@
     "react-toastify": "^10.0.5",
     "sharp": "^0.33.5",
     "styled-components": "^6.1.11",
-    "zustand": "^5.0.0-rc.2"
+    "zustand": "4.5.4"
   },
   "devDependencies": {
     "@types/node": "^20",

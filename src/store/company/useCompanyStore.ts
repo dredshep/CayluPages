@@ -3,7 +3,6 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { ApiCompany } from "@/pages/api/companies/[id]";
 import api from "@/utils/api";
 import moment from "moment";
-import dummyCompanies from "@/assets/dummyCompanies";
 
 interface CompanyState {
   companies: ApiCompany[];
@@ -29,24 +28,28 @@ export const useCompanyStore = create(
         console.log(
           "@/store/company/useCompanyStore.ts:28 fetchCompanies called",
         );
+        set({ isLoading: true });
 
         try {
-          await new Promise<void>((resolve) => {
-            console.log("@/store/company/useCompanyStore.ts: Inside Promise");
-
-            setTimeout(() => {
-              console.log(
-                "@/store/company/useCompanyStore.ts: Resolving Promise",
-              );
-
-              // **Temporarily set dummy companies for testing**
-              set({ companies: dummyCompanies, isLoading: false });
-              resolve();
-            }, 1000);
-          });
           console.log(
-            "@/store/company/useCompanyStore.ts: After Promise resolved",
+            "@/store/company/useCompanyStore.ts: Fetching companies from API",
           );
+          const response = await api.get("/companies");
+          console.log(
+            "@/store/company/useCompanyStore.ts: API response received",
+            response.data,
+          );
+
+          set({ companies: response.data, isLoading: false });
+          console.log(
+            "@/store/company/useCompanyStore.ts: Companies set in state",
+          );
+
+          // Update availability after fetching companies
+          await get().updateAvailability();
+        } catch (error) {
+          console.error("Error fetching companies:", error);
+          set({ isLoading: false });
         } finally {
           console.log(
             "@/store/company/useCompanyStore.ts: Exiting fetchCompanies",
@@ -64,10 +67,7 @@ export const useCompanyStore = create(
           const response = await api.get(`/companies/${id}`);
           const company = response.data;
           set((state) => ({
-            companies: [
-              ...state.companies.filter((c) => c.id !== id),
-              company,
-            ],
+            companies: [...state.companies.filter((c) => c.id !== id), company],
           }));
           return company;
         } catch (error) {
@@ -77,7 +77,9 @@ export const useCompanyStore = create(
       },
 
       updateAvailability: async () => {
-        console.log("updateAvailability called");
+        console.log(
+          "@/store/company/useCompanyStore.ts: updateAvailability called",
+        );
         const { companies } = get();
         const now = Date.now();
 

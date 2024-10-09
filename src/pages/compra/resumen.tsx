@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import Image from "next/image";
 import { useCartStore2 } from "@/store/useCartStore2";
-import { CartProduct } from "@/types/CartProduct";
+import { useUserStore } from "@/store/useUserStore";
 import AppNavbar from "@/components/sections/AppNavbar";
-import getPlaceholderImageUrl from "@/utils/getPlaceholderImageUrl";
+import AddressSelector from "@/components/checkout/AddressSelector";
+import OrderSummary from "@/components/checkout/OrderSummary";
+import PromoCodeInput from "@/components/checkout/PromoCodeInput";
 import { createOrder } from "@/services/orderService";
+import { calculateDeliveryFee } from "@/services/deliveryService";
 
-export default function OrderSummary() {
+export default function OrderSummaryPage() {
   const router = useRouter();
-  const { cart } = useCartStore2();
+  const { cart, clearCart } = useCartStore2();
+  const { addresses } = useUserStore();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [promoCode, setPromoCode] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState<number>(0);
+  const [deliveryFee, setDeliveryFee] = useState(0);
 
   useEffect(() => {
     if (!cart || !cart.products || cart.products.length === 0) {
@@ -22,32 +26,18 @@ export default function OrderSummary() {
     }
   }, [cart, router]);
 
-  const calculateRestaurantTotal = (): number => {
-    if (!cart || !cart.products) return 0;
-    return cart.products.reduce(
-      (sum, product) => sum + calculateProductTotal(product),
-      0
-    );
-  };
+  useEffect(() => {
+    if (addresses.length > 0) {
+      setSelectedAddress(addresses[0].id);
+    }
+  }, [addresses]);
 
-  const calculateProductTotal = (product: CartProduct): number => {
-    const basePrice = product.price * product.quantity;
-    const additionalsPrice =
-      product.additionals?.reduce(
-        (sum, additional) =>
-          sum + Number(additional.price) * (additional.quantity || 0),
-        0
-      ) || 0;
-    return basePrice + additionalsPrice;
+  const handleAddressChange = async (addressId: number) => {
+    setSelectedAddress(addressId);
+    const fee = await calculateDeliveryFee(cart!.company_id, addressId);
+    console.log("Delivery fee:", fee);
+    setDeliveryFee(fee);
   };
-
-  const restaurantTotal = calculateRestaurantTotal();
-  const deliveryFee = 3.4;
-  const taxableAmount = restaurantTotal + deliveryFee;
-  const foodIVA = restaurantTotal * 0.1;
-  const deliveryIVA = deliveryFee * 0.21;
-  const totalIVA = foodIVA + deliveryIVA;
-  const total = taxableAmount + totalIVA;
 
   const handleProceedToPayment = async () => {
     if (!cart || !cart.products || cart.products.length === 0) {
@@ -64,16 +54,11 @@ export default function OrderSummary() {
 
     if (result.success) {
       alert(`Order created successfully with ID: ${result.orderId}`);
-      useCartStore2.getState().clearCart();
+      clearCart();
       router.push("/compra/pago");
     } else {
       alert(`Error creating order: ${result.error}`);
     }
-  };
-
-  const handleApplyPromoCode = () => {
-    // Implement promo code logic here
-    console.log("Applying promo code:", promoCode);
   };
 
   return (
@@ -92,89 +77,14 @@ export default function OrderSummary() {
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                 Detalles del Pedido
               </h2>
-              {cart.products.map((product) => (
-                <div
-                  key={product.p_id}
-                  className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200"
-                >
-                  <div className="flex items-center">
-                    <Image
-                      src={
-                        product.image ||
-                        getPlaceholderImageUrl({
-                          width: 50,
-                          height: 50,
-                          bgColor: "e0e0e0",
-                          textColor: "757575",
-                        })
-                      }
-                      alt={product.name}
-                      width={50}
-                      height={50}
-                      className="rounded-md mr-4"
-                    />
-                    <div>
-                      <h3 className="font-medium text-gray-800">
-                        {product.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Cantidad: {product.quantity}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="font-semibold text-gray-800">
-                    €{calculateProductTotal(product).toFixed(2)}
-                  </p>
-                </div>
-              ))}
-              <div className="mt-8">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-gray-600">Subtotal Restaurante</span>
-                  <span className="font-semibold text-gray-800">
-                    €{restaurantTotal.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-gray-600">Gastos de envío</span>
-                  <span className="font-semibold text-gray-800">
-                    €{deliveryFee.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-gray-600">IVA Comida (10%)</span>
-                  <span className="font-semibold text-gray-800">
-                    €{foodIVA.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-gray-600">IVA Envío (21%)</span>
-                  <span className="font-semibold text-gray-800">
-                    €{deliveryIVA.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-xl font-bold text-gray-800 mt-6">
-                  <span>Total</span>
-                  <span>€{total.toFixed(2)}</span>
-                </div>
-              </div>
+              <AddressSelector
+                addresses={addresses}
+                selectedAddress={selectedAddress}
+                onAddressChange={handleAddressChange}
+              />
+              <OrderSummary cart={cart.products} deliveryFee={deliveryFee} />
             </div>
-            <div className="bg-gray-50 px-6 py-4">
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  placeholder="Código promocional"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-                <button
-                  onClick={handleApplyPromoCode}
-                  className="bg-teal-500 text-white px-4 py-2 rounded-r-md hover:bg-teal-600 transition duration-150 ease-in-out"
-                >
-                  Aplicar
-                </button>
-              </div>
-            </div>
+            <PromoCodeInput />
             <div className="px-6 py-4">
               <button
                 onClick={handleProceedToPayment}

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+/**
+ * @description Tool to check if a point is inside a polygon
+ */
 const PointInPolygonTool: React.FC = () => {
   const [point, setPoint] = useState<string>("");
   const [result, setResult] = useState<string | null>(null);

@@ -127,7 +127,7 @@ export interface ApiCompany extends ConvertBigIntToNumber<companies> {
   additionals: ConvertBigIntToNumber<additionals>[];
   cities: ConvertBigIntToNumber<cities>[];
   company_holidays: ConvertBigIntToNumber<company_holidays>[];
-  geolocations: ConvertBigIntToNumber<geolocations>[];
+  geolocations: ConvertBigIntToNumber<geolocations>;
   offers: ConvertBigIntToNumber<offers>[];
   order_purchases: ConvertBigIntToNumber<order_purchases>[];
   orders: ConvertBigIntToNumber<orders>[];

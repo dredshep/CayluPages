@@ -5,7 +5,7 @@ import moment from "moment";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   // console.log("Request method:", req.method);
   // console.log("Request body:", req.body);
@@ -40,22 +40,15 @@ export default async function handler(
       try {
         const companyHours = businessHoursByCompany[companyId.toString()] || [];
         const todayHours = companyHours.find(
-          (hour) => hour.weekday === now.day()
+          (hour) => hour.weekday === now.day(),
         );
 
         const isOpen = checkIsOpen(
           companyId,
           businessHoursByCompany,
           holidaysByCompany,
-          now
+          now,
         );
-
-        // console.log(`Company ${companyId}:`, {
-        //   isOpen,
-        //   todayHours,
-        //   currentDay: now.day(),
-        // });
-
         return {
           companyId,
           isOpen,

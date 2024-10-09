@@ -29,24 +29,32 @@ class TimeValidator {
   // Validate if a given time is within the business hours for a specific weekday
   validateBusinessHours(
     targetTime: Moment,
-    businessHour: BusinessHour
+    businessHour: BusinessHour,
   ): boolean {
-    // const weekday = targetTime.day(); // Get the weekday (0 for Sunday, 1 for Monday, etc.)
+    // Adjust the weekday to match the business hour format (1-7 instead of 0-6)
     // 1 is sunday, 2 is monday, 3 is tuesday, etc.
+
     const weekday = targetTime.day() + 1;
 
     // If it's not the same weekday, it's automatically out of range
     if (businessHour.weekday !== weekday) return false;
 
-    // Create Moment instances for the start and end time of this row
-    const businessStart = moment(
-      targetTime.format("YYYY-MM-DD") + " " + businessHour.start_time,
-      "YYYY-MM-DD HH:mm"
-    );
-    const businessEnd = moment(
-      targetTime.format("YYYY-MM-DD") + " " + businessHour.end_time,
-      "YYYY-MM-DD HH:mm"
-    );
+    const businessStart = moment(targetTime).set({
+      hour: parseInt(businessHour.start_time.split(":")[0]),
+      minute: parseInt(businessHour.start_time.split(":")[1]),
+      second: 0,
+    });
+
+    const businessEnd = moment(targetTime).set({
+      hour: parseInt(businessHour.end_time.split(":")[0]),
+      minute: parseInt(businessHour.end_time.split(":")[1]),
+      second: 0,
+    });
+
+    // Handle cases where end time is on the next day
+    if (businessEnd.isBefore(businessStart)) {
+      businessEnd.add(1, "day");
+    }
 
     // Check if the target time falls within the business hours
     return targetTime.isBetween(businessStart, businessEnd, undefined, "[]");
@@ -67,7 +75,7 @@ class TimeValidator {
   // Check if the business is open for a specific BusinessHour (considering holidays)
   isBusinessOpenAtTime(
     businessHour: BusinessHour,
-    targetTime: Moment
+    targetTime: Moment,
   ): boolean {
     const isHoliday = this.validateHoliday(targetTime);
 
@@ -88,18 +96,18 @@ class TimeValidator {
 
     const productStart = moment(
       targetTime.format("YYYY-MM-DD") + " " + productHour.start_time,
-      "YYYY-MM-DD HH:mm"
+      "YYYY-MM-DD HH:mm",
     );
     const productEnd = moment(
       targetTime.format("YYYY-MM-DD") + " " + productHour.end_time,
-      "YYYY-MM-DD HH:mm"
+      "YYYY-MM-DD HH:mm",
     );
 
     const isBetween = targetTime.isBetween(
       productStart,
       productEnd,
       undefined,
-      "[]"
+      "[]",
     );
     console.log("isBetween", isBetween);
     return isBetween;
@@ -108,7 +116,7 @@ class TimeValidator {
   // Check if a product is available at a specific time
   isProductAvailableAtTime(
     productHour: ProductHour,
-    targetTime: Moment
+    targetTime: Moment,
   ): boolean {
     const isHoliday = this.validateHoliday(targetTime);
     console.log("isHoliday", isHoliday);

@@ -17,23 +17,29 @@ const verifyToken = (token: string | undefined): number => {
   return parseInt(decoded.id as string, 10);
 };
 
-const getPreferredAddress = async (userId: number) => {
+const getAddress = async (userId: number, addressId: number) => {
   return prisma.addresses.findFirst({
-    where: { user_id: userId, status: "Active", is_preferred: true },
+    where: { id: addressId, user_id: userId, status: "Active" },
   });
 };
 
-const setPreferredAddress = async (userId: number, addressId: number) => {
-  // First, unset the current preferred address
-  await prisma.addresses.updateMany({
-    where: { user_id: userId, is_preferred: true },
-    data: { is_preferred: false },
-  });
-
-  // Then, set the new preferred address
+const updateAddress = async (
+  userId: number,
+  addressId: number,
+  address: string,
+  lat: Decimal,
+  lng: Decimal,
+) => {
   return prisma.addresses.update({
     where: { id: addressId, user_id: userId },
-    data: { is_preferred: true },
+    data: { address, lat, lng },
+  });
+};
+
+const deleteAddress = async (userId: number, addressId: number) => {
+  await prisma.addresses.update({
+    where: { id: addressId, user_id: userId },
+    data: { status: "Trash" },
   });
 };
 
@@ -51,24 +57,36 @@ export default async function handler(
       return res.status(401).json({ error: "Invalid token" });
     }
 
+    const addressId = parseInt(req.query.id as string, 10);
+    if (isNaN(addressId)) {
+      return res.status(400).json({ error: "Invalid address ID" });
+    }
+
     const onGET = async () => {
-      const preferredAddress = await getPreferredAddress(userId);
-      if (!preferredAddress) {
-        return res.status(404).json({ error: "No preferred address found" });
+      const address = await getAddress(userId, addressId);
+      if (!address) {
+        return res.status(404).json({ error: "Address not found" });
       }
       return res.status(200).json({
-        ...preferredAddress,
-        user_id: Number(preferredAddress.user_id),
-        id: Number(preferredAddress.id),
+        ...address,
+        user_id: Number(address.user_id),
+        id: Number(address.id),
       });
     };
 
     const onPUT = async () => {
-      const { addressId } = req.body as { addressId: number };
-      if (!addressId) {
-        return res.status(400).json({ error: "Address ID is required" });
-      }
-      const updatedAddress = await setPreferredAddress(userId, addressId);
+      const { address, lat, lng } = req.body as {
+        address: string;
+        lat: Decimal;
+        lng: Decimal;
+      };
+      const updatedAddress = await updateAddress(
+        userId,
+        addressId,
+        address,
+        lat,
+        lng,
+      );
       return res.status(200).json({
         ...updatedAddress,
         user_id: Number(updatedAddress.user_id),
@@ -76,17 +94,24 @@ export default async function handler(
       });
     };
 
+    const onDELETE = async () => {
+      await deleteAddress(userId, addressId);
+      return res.status(200).json({ message: "Address deleted successfully" });
+    };
+
     switch (req.method) {
       case "GET":
         return onGET();
       case "PUT":
         return onPUT();
+      case "DELETE":
+        return onDELETE();
       default:
-        res.setHeader("Allow", ["GET", "PUT"]);
+        res.setHeader("Allow", ["GET", "PUT", "DELETE"]);
         return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (error: any) {
-    console.error("Error handling preferred user address:", error);
+    console.error("Error handling user address:", error);
     return res
       .status(error.message === "No token provided" ? 401 : 500)
       .json({ error: error.message || "Internal server error" });

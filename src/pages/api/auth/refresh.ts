@@ -18,7 +18,7 @@ export default async function handler(
 
     try {
       // Check if the token is blacklisted
-      const blacklistedToken = await prisma.token_blacklist.findUnique({
+      const blacklistedToken = await prisma.token_blacklist.findFirst({
         where: { token: oldToken },
       });
 

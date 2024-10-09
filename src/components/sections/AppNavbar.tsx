@@ -54,10 +54,10 @@ export default function AppNavbar() {
         {/* Hamburger Icon */}
         <HamburgerIcon stroke="black" />
         {/* Location */}
-        <Link href="/" className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center">
           <LocationIcon />
           Pontevedra
-        </Link>
+        </div>
       </div>
       {/* Pickup or Takeaway selection */}
       <div className="flex bg-[#d1d1d1] rounded-full items-center py-[5px] px-1.5 h-[53px] gap-1.5 select-none">

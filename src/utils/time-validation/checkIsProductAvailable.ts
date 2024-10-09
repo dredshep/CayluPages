@@ -6,7 +6,7 @@ export function checkIsProductAvailable(
   productHoursByProduct: Record<string, any[]>,
   holidaysByCompany: Record<string, any[]>,
   companyId: number,
-  now = moment()
+  now = moment(),
 ) {
   const productKey = productId.toString();
   const companyKey = companyId.toString();
@@ -29,7 +29,7 @@ export function checkIsProductAvailable(
   const dbWeekday = dayMap[now.day() as keyof typeof dayMap];
 
   const todayProductHours = productHoursForValidation.filter(
-    (hour) => hour.weekday === dbWeekday
+    (hour) => hour.weekday === dbWeekday,
   );
 
   for (const productHour of todayProductHours) {
@@ -38,5 +38,7 @@ export function checkIsProductAvailable(
     }
   }
 
-  return false; // Product is not available
+  // return false; // Product is not available
+  // TODO: Check if the product is available in the future
+  return true;
 }
