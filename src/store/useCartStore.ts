@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { CartProduct, Cart } from "@/types"; // Assuming you've defined these types elsewhere
+import { createJSONStorage, persist } from "zustand/middleware";
+import { Cart, CartProduct } from "@/types"; // Assuming you've defined these types elsewhere
 
 interface CartState {
   cart: Cart | null;
@@ -19,7 +19,7 @@ export const useCartStore = create<CartState>()(
         const currentCart = get().cart;
         if (currentCart && currentCart.company_id === company_id) {
           const existingProductIndex = currentCart.products.findIndex(
-            (p) => p.p_id === product.p_id
+            (p) => p.p_id === product.p_id,
           );
           if (existingProductIndex !== -1) {
             // Product exists, just update quantity
@@ -58,7 +58,7 @@ export const useCartStore = create<CartState>()(
         const currentCart = get().cart;
         if (currentCart) {
           const updatedProducts = currentCart.products.filter(
-            (p) => p.p_id !== product_id
+            (p) => p.p_id !== product_id,
           );
           set({ cart: { ...currentCart, products: updatedProducts } });
         }
@@ -70,7 +70,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "cart-storage", // Name of the storage item
-      getStorage: () => localStorage, // Returns the storage area
-    }
-  )
+      storage: createJSONStorage(() => localStorage),
+    },
+  ),
 );

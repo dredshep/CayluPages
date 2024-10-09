@@ -64,14 +64,10 @@ export default function UserAddressModal({
     >
       {!editMode ? (
         <AddressList
-          addresses={addresses}
-          selectedAddressId={selectedAddressId}
           onEdit={(id) => {
             setEditMode(true);
             setEditId(id);
           }}
-          onDelete={handleDelete}
-          onSelect={setSelectedAddressId}
           onAddNew={() => {
             setEditMode(true);
             setEditId(null);

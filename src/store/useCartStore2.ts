@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { CartAdditional, CartProduct } from "@/types";
 type Cart = {
   company_id: number;
@@ -128,7 +128,7 @@ export const useCartStore2 = create<CartState>()(
     }),
     {
       name: "cart-storage", // Name of the storage item
-      getStorage: () => localStorage, // Returns the storage area
+      storage: createJSONStorage(() => localStorage),
     },
   ),
 );
