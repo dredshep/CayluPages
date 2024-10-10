@@ -18,11 +18,12 @@ interface GeocodingSuggestion {
   lat: string;
   lng: string;
   address: AddressDetails;
+  fullResult: object;
 }
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<GeocodingSuggestion[] | { error: string }>,
+  res: NextApiResponse<GeocodingSuggestion[] | { error: string }>
 ) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -44,17 +45,20 @@ export default async function handler(
           limit: 5,
           addressdetails: 1,
         },
-      },
+      }
     );
 
     const results = response.data;
 
     if (results && results.length > 0) {
       const suggestions: GeocodingSuggestion[] = results.map((result) => ({
+        // Example name: Avenida de Algorta, 14, San Fernand
+        // display_name: `${result.address.road} ${result.}`
         display_name: result.display_name,
         lat: result.lat,
         lng: result.lon,
         address: result.address,
+        fullResult: result,
       }));
       res.status(200).json(suggestions);
     } else {

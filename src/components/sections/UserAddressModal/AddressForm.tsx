@@ -1,12 +1,14 @@
-import { useState, useEffect } from "react";
-import { Address } from "@/types/address";
+import { useState, useEffect, useCallback } from "react";
+import { Address } from "@/types/Address";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { GeocodingSuggestion } from "@/types/geo/Geocoding";
+import debounce from "lodash/debounce";
+import { UserAddress } from "@/store/useUserStore";
 
 interface AddressFormProps {
   editId: number | null;
-  addresses: Address[];
+  addresses: UserAddress[];
   onSubmit: (formData: { address: string; lat: number; lng: number }) => void;
   onCancel: () => void;
 }
@@ -21,8 +23,7 @@ export default function AddressForm({
   const [formLat, setFormLat] = useState(0);
   const [formLng, setFormLng] = useState(0);
   const [suggestions, setSuggestions] = useState<GeocodingSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (editId) {
@@ -44,30 +45,38 @@ export default function AddressForm({
     onSubmit({ address: formAddress, lat: formLat, lng: formLng });
   };
 
-  const handleSearch = async () => {
-    if (formAddress.length < 3) {
+  const fetchSuggestions = async (address: string) => {
+    if (address.length < 10) {
       setSuggestions([]);
       return;
     }
-
     setIsLoading(true);
-    setError(null);
-
     try {
       const response = await axios.get<GeocodingSuggestion[]>(
         "/api/geo/geocoding",
         {
-          params: { address: formAddress },
+          params: { address },
         }
       );
       setSuggestions(response.data);
     } catch (error) {
       console.error("Error fetching address suggestions:", error);
-      setError("Failed to fetch address suggestions. Please try again.");
+      toast.error("Failed to fetch address suggestions. Please try again.");
       setSuggestions([]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const debouncedFetchSuggestions = useCallback(
+    debounce(fetchSuggestions, 300),
+    []
+  );
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAddress = e.target.value;
+    setFormAddress(newAddress);
+    debouncedFetchSuggestions(newAddress);
   };
 
   const handleSuggestionClick = (suggestion: GeocodingSuggestion) => {
@@ -90,12 +99,12 @@ export default function AddressForm({
           type="text"
           id="address"
           value={formAddress}
-          onChange={(e) => setFormAddress(e.target.value)}
-          onBlur={handleSearch}
+          onChange={handleAddressChange}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
           required
         />
       </div>
+      {isLoading && <p>Loading suggestions...</p>}
       {suggestions.length > 0 && (
         <ul className="mt-2 border rounded">
           {suggestions.map((suggestion, index) => (

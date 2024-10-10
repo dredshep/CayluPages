@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import api from "@/utils/api";
 import { useAuthStore } from "./useAuthStore";
 
-interface UserAddress {
+export interface UserAddress {
   id: number;
   address: string;
   lat: number;
@@ -70,9 +70,8 @@ export const useUserStore = create<UserState>()(
           await api.delete(`/user/address`, { data: { id } });
           set((state) => ({
             addresses: state.addresses.filter((a) => a.id !== id),
-            selectedAddressId: state.selectedAddressId === id
-              ? null
-              : state.selectedAddressId,
+            selectedAddressId:
+              state.selectedAddressId === id ? null : state.selectedAddressId,
           }));
         } catch (error) {
           console.error("Error deleting user address:", error);
@@ -83,6 +82,6 @@ export const useUserStore = create<UserState>()(
     {
       name: "user-storage",
       storage: createJSONStorage(() => localStorage),
-    },
-  ),
+    }
+  )
 );

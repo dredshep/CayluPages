@@ -13,7 +13,6 @@ const days = [
 ] as const;
 
 const today = new Date().getDay();
-const todayName = days[today];
 
 export async function isRestaurantOpen(restaurantId: bigint): Promise<boolean> {
   const businessHour = await prisma.business_hours.findFirst({
@@ -29,7 +28,7 @@ export async function isRestaurantOpen(restaurantId: bigint): Promise<boolean> {
 
   if (!businessHour) {
     throw new Error(
-      "Restaurant not found or business hours not set for today.",
+      "Restaurant not found or business hours not set for today."
     );
   }
 
@@ -80,13 +79,15 @@ export const testRestaurantOpenStatus = async () => {
   restaurantsWithHours.forEach((restaurant) => {
     if (restaurant.business_hours.length === 0) {
       console.log(
-        `Restaurant ${restaurant.id.toString()} has no business hours set.`,
+        `Restaurant ${restaurant.id.toString()} has no business hours set.`
       );
     } else {
       console.log(`Business hours for Restaurant ${restaurant.id.toString()}:`);
       restaurant.business_hours.forEach((hour) => {
         console.log(
-          `Day: ${hour.day_id}, Open: ${hour.open?.toISOString()}, Close: ${hour.close?.toISOString()}`,
+          `Day: ${
+            hour.day_id
+          }, Open: ${hour.open?.toISOString()}, Close: ${hour.close?.toISOString()}`
         );
       });
     }
