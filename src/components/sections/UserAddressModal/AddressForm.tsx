@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import { Address } from "@/types/address";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { GeocodingSuggestion } from "@/types/geo/Geocoding";
 
 interface AddressFormProps {
   editId: number | null;
@@ -17,6 +20,9 @@ export default function AddressForm({
   const [formAddress, setFormAddress] = useState("");
   const [formLat, setFormLat] = useState(0);
   const [formLng, setFormLng] = useState(0);
+  const [suggestions, setSuggestions] = useState<GeocodingSuggestion[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (editId) {
@@ -38,23 +44,37 @@ export default function AddressForm({
     onSubmit({ address: formAddress, lat: formLat, lng: formLng });
   };
 
-  const handlePasteLatLng = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      const match = text.match(/\[([-\d.]+),\s*([-\d.]+)\]/);
-      if (match) {
-        const [, lat, lng] = match;
-        setFormLat(parseFloat(lat));
-        setFormLng(parseFloat(lng));
-      } else {
-        alert(
-          "Invalid format. Please copy a value like [-3.683067, 40.417325]"
-        );
-      }
-    } catch (err) {
-      console.error("Failed to read clipboard contents: ", err);
-      alert("Failed to paste coordinates. Please try again.");
+  const handleSearch = async () => {
+    if (formAddress.length < 3) {
+      setSuggestions([]);
+      return;
     }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get<GeocodingSuggestion[]>(
+        "/api/geo/geocoding",
+        {
+          params: { address: formAddress },
+        }
+      );
+      setSuggestions(response.data);
+    } catch (error) {
+      console.error("Error fetching address suggestions:", error);
+      setError("Failed to fetch address suggestions. Please try again.");
+      setSuggestions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: GeocodingSuggestion) => {
+    setFormAddress(suggestion.display_name);
+    setFormLat(parseFloat(suggestion.lat));
+    setFormLng(parseFloat(suggestion.lng));
+    setSuggestions([]);
   };
 
   return (
@@ -71,10 +91,24 @@ export default function AddressForm({
           id="address"
           value={formAddress}
           onChange={(e) => setFormAddress(e.target.value)}
+          onBlur={handleSearch}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
           required
         />
       </div>
+      {suggestions.length > 0 && (
+        <ul className="mt-2 border rounded">
+          {suggestions.map((suggestion, index) => (
+            <li
+              key={index}
+              className="p-2 hover:bg-gray-100 cursor-pointer"
+              onClick={() => handleSuggestionClick(suggestion)}
+            >
+              {suggestion.display_name}
+            </li>
+          ))}
+        </ul>
+      )}
       <div>
         <label
           htmlFor="lat"
@@ -108,15 +142,6 @@ export default function AddressForm({
           required
           step="any"
         />
-      </div>
-      <div>
-        <button
-          type="button"
-          onClick={handlePasteLatLng}
-          className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          Paste Lat/Long
-        </button>
       </div>
       <div className="mt-6 flex justify-end space-x-3">
         <button
